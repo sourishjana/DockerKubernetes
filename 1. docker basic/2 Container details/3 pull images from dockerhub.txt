@@ -1,0 +1,7 @@
+> docker login
+
+> docker pull sourishjana/demoimages:v1
+
+>docker run -p 3000:80 -d --rm --name nodeapp sourishjana/demoimages:v1
+
+>docker stop nodeapp

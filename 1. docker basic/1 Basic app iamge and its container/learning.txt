@@ -1,0 +1,123 @@
+INTIAL DOCKER FILE:
+
+FROM node 
+WORKDIR /app 
+COPY . /app 
+RUN npm install 
+EXPOSE 80 
+CMD ["node", "server.js"]
+
+
+
+
+
+FROM node -> This will first create a environment to run our docker application for now we will be going with a existing image in docker hub and use that
+
+WORKDIR /app -> Specify this to create a work dir where our code will be lying in the image from which container will be created
+
+COPY . /app -> . means every foler, sub folder, files inside the curr dir other than the docker file and ./app means copy all the files inside the /app directory which is also our working dir 
+
+RUN npm install -> when a container will ve created then first run this command to install all the npm packages inside the docker container.
+
+EXPOSE 80 -> This command is a optional command but it is a good idea to write it as it tells where our local port inside the container will be in. This port is also mentioned in the server.js file.
+
+CMD ["node", "server.js"] -> this is same as running a cmd > node server.js 
+which will run our application locally inside the container at port 80.
+
+
+
+CREATING a DOCKER IMAGE:
+
+Dir where the Docker file is present > docker build .
+e.g in our case it will be
+F:\Docker\nodejs-app-first-dockerfile\nodejs-app-first-dockerfile> docker build .
+
+If you open the docker app in the images section you will find the image created with arandom name and its image id.
+
+Copy the image id and we will be using that to create a container.
+
+CREATING a CONTAINER out of the DOCKER IMAGE:
+
+> docker run sha256:c29c00667fa1aa05d107e138f3138ed976f6b60c305b196e8991c0a31f8bf3de
+
+Here sha256:c29c00667fa1aa05d107e138f3138ed976f6b60c305b196e8991c0a31f8bf3de is the copied image id 
+
+Now even if we run the container using the image then we access port 80 we will not be able to access the application from our local machine because the port is inside the container and is not exposed to our local environment. for that we need to expose the port 80 into the containers exposed port.
+
+>docker run -p 3000:80 sha256:c29c00667fa1aa05d107e138f3138ed976f6b60c305b196e8991c0a31f8bf3de
+
+In this way we are telling docker to expose the port 80 to port 3000 so that we can access our application from our local env.
+
+http://localhost:3000/
+
+
+TO SEE ALL THE RUNNING DOCKER CONTAINERS:
+
+F:\Docker\nodejs-app-first-dockerfile\nodejs-app-first-dockerfile>docker ps        
+CONTAINER ID   IMAGE          COMMAND                  CREATED          STATUS          PORTS                  NAMES
+228957ebae30   f4ce2841d932   "docker-entrypoint.s…"   39 seconds ago   Up 38 seconds   0.0.0.0:3000->80/tcp   strange_mclaren
+
+
+F:\Docker\nodejs-app-first-dockerfile\nodejs-app-first-dockerfile>docker ps -a
+CONTAINER ID   IMAGE          COMMAND                  CREATED          STATUS                        PORTS                  NAMES
+228957ebae30   f4ce2841d932   "docker-entrypoint.s…"   47 seconds ago   Up 46 seconds                 0.0.0.0:3000->80/tcp   strange_mclaren
+962dbafa3adf   c29c00667fa1   "docker-entrypoint.s…"   34 minutes ago   Exited (137) 18 minutes ago                          nice_volhard
+
+
+STOP A DOCKER CONTAINER:
+
+Copy the container id from docker and run this cmd
+
+F:\Docker\nodejs-app-first-dockerfile\nodejs-app-first-dockerfile>docker stop 962dbafa3adf054c223f50d4bbef62b4b0628e2ab8734bd3d52248b2b1f78794
+962dbafa3adf054c223f50d4bbef62b4b0628e2ab8734bd3d52248b2b1f78794
+
+
+IMAGES ARE READONLY:
+
+Now if we change something in our code and stop and restart our container then the changes will not reflect because we already have a image and created a container out of the image now if we change the code we have to create a new image and then create a new container out of the new image then only the changes will reflect.
+
+
+IMAGES ARE LAYER BASED:
+
+FROM node                       -> Layer 1
+
+WORKDIR /app                    -> Layer 2
+
+COPY . /app                     -> Layer 3
+
+RUN npm install                 -> Layer 4
+
+EXPOSE 80                       -> Layer 5
+
+CMD ["node", "server.js"]       -> Layer 6
+
+
+So suppose if we donot change our code and rebuild our same image [docker build .] then it will execute in less time as now it will execute all the layers step by step from its own cache. 
+
+Now if we change our code in service.js file then again build the same docker image again then will will execute layer 1,2 from cache and from layer 3 i.e copy code it will execute steps manually without cache, as it detects that some change happned in the code so need to copy the code once again.
+
+after that all the layers ie layer 4,5,6 will be executed manually.
+
+
+SOME OPTIMIZATIONS:
+
+Now that we have understood th elayer based system in docker we have to optimize our code little bit. In our early code if something changes in the [COPY . /app] layer then all the subsequent layers will be runned unnecessarily even if we know that npm install is not required untill we have changed something in the package.json file.
+
+So we will copy the package.json and run the npm install early then copy the rest of the code. In this way we donot have to run npm install unnecessarily.
+
+Updated Docker file:
+
+FROM node                       -> Layer 1
+
+WORKDIR /app                    -> Layer 2
+
+COPY package.json /app          -> Layer 3
+
+RUN npm install                 -> Layer 4
+
+COPY . /app                     -> Layer 5
+
+EXPOSE 80                       -> Layer 6
+
+CMD ["node", "server.js"]       -> Layer 7
+

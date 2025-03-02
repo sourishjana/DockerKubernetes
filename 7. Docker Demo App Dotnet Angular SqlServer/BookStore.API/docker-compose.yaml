@@ -1,0 +1,33 @@
+name: bookapi
+services:
+  sqldatabase:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - "8095:1433"
+    volumes:
+      - sqldatabase_data:/var/opt/mssql
+    env_file:
+      - ./env/sqlserver.env
+
+  dotnetapp:
+    build: ./BookStore.API
+    ports:
+      - "80:80"
+      - "443:443"
+    env_file:
+      - ./env/bookapp.env
+    depends_on:
+      - sqldatabase
+
+  angularapp:
+    build: ./BookStoreWebApp
+    ports:
+      - "3000:8080"
+    stdin_open: true 
+    tty: true 
+    depends_on:
+      - dotnetapp
+
+
+volumes:
+  sqldatabase_data:

@@ -1,0 +1,97 @@
+for the problem we discussed earlier we have to use volumes 
+
+Volumnes are the local host machine storage used inside of the containers in order to solve the problem
+
+> docker volume --help
+> docker volume ls
+
+
+two types of volumes:
+1. Anonymous volume
+2. Named volume
+
+1. Anonymous volume:
+
+Dockerfile:
+FROM node:14
+
+WORKDIR /app
+
+COPY package.json /app
+
+RUN npm install
+
+COPY . /app
+
+EXPOSE 80
+
+VOLUME [ "/app/feedback" ]
+
+CMD [ "node", "server.js" ]
+
+
+> docker build -t feedbackappimage:v1 .
+> docker run -p 3000:80 -d --rm --name feedbackapp feedbackappimage:v1
+
+Add one feedback
+
+> docker volume ls
+DRIVER    VOLUME NAME
+local     db9466fb735e38967c6445e1bed69886c5acb6eb1d281b71b95d385bfd1d316f
+
+
+Here we can add one line which tells which part of the container folder should be a volume and should persist across containers.
+But in this case we donot know where our files are stored and also we cannot access them also. That is why they are Anonymous volume.
+
+> docker stop feedbackapp
+
+> docker volume ls
+DRIVER    VOLUME NAME
+
+
+Now see if we stop the container then the Anonymous volume also gets removed. But this we donot want. 
+So Anonymous volume is attached with a container, and it persist till the container is there.
+
+
+2. Named volume:
+
+Now remove the volume part from the docker file as it was for anonymous volume
+
+Dockerfile:
+FROM node:14
+
+WORKDIR /app
+
+COPY package.json /app
+
+RUN npm install
+
+COPY . /app
+
+EXPOSE 80
+
+CMD [ "node", "server.js" ]
+
+
+-v volume_name:actual_container_file_storage_location
+e.g -v appvolume:/app/feedback
+
+> docker run -p 3000:80 -d --rm --name feedbackapp -v appvolume:/app/feedback feedbackappimage:v1
+
+> docker volume ls        
+DRIVER    VOLUME NAME
+local     appvolume
+
+> docker stop feedbackapp
+
+Even if you remove the container then also in the below cmd the volume persist now.
+
+> docker volume ls        
+DRIVER    VOLUME NAME
+local     appvolume
+
+> docker run -p 3000:80 -d --rm --name feedbackapp -v appvolume:/app/feedback feedbackappimage:v1
+
+We try to add 'hello' feedback it says already exists
+If we try http://localhost:3000/feedback/hello.txt we can see our file
+

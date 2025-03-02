@@ -1,0 +1,57 @@
+
+WHY WE USE DOCKER_COMPOSE?
+
+As you can see in the docker-commands.txt file we have all the commands to run mongodb, backend,frontend
+
+All the cmds are super big and annoying to run these long comands. Instead of that we are using docker compose so that we just run docker-compose up -d and everthing is done.
+
+
+
+
+
+
+--rm and -d are not used in docker compose beause by default it will be there.
+
+--network goals-net is also not required because container created using docker compose will automatically be in same network.
+although you can use your own network
+
+name: composeapp
+services:
+  mongodb:
+    image: 'mongo'
+    volumes:
+      - data:/data/db
+    # environment:
+    #   #- MONGO_INITDB_ROOT_USERNAME=max
+    #   - MONGO_INITDB_ROOT_USERNAME: sourish
+    #   - MONGO_INITDB_ROOT_PASSWORD: secret
+    env_file:
+      - ./env/mongo.env
+    # networks:
+    #   - goals-net
+  # backend:
+  # frontend:
+
+
+volumes:
+  data:
+
+
+By default it will run in attached mode:
+>docker-compose up 
+
+For Detached mode we have to specify like this
+>docker-compose up -d
+
+This will automatically remove all the containers 
+> docker-compose down
+
+This will also delete the volumes associated
+> docker-compose down -v
+
+
+In order to get other commands
+>docker-compose --help
+
+It will just create images not create containers
+> docker-compose build 

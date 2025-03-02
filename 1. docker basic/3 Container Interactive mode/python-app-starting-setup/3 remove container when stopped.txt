@@ -1,0 +1,14 @@
+WHEN WE STOP A CONTAINER IT SHOULD BE REMOVED: Using cmd --rm 
+
+>docker run -p 3000:80 -d --rm image_id
+
+>docker ps -a
+CONTAINER ID   IMAGE          COMMAND                  CREATED              STATUS                        PORTS                  NAMES
+dbff623d1037   c29c00667fa1   "docker-entrypoint.s…"   About a minute ago   Up About a minute             0.0.0.0:3000->80/tcp   agitated_babbage
+49ba9f142090   c29c00667fa1   "docker-entrypoint.s…"   49 minutes ago       Exited (137) 29 minutes ago                          cranky_lamport
+
+>docker stop container_id
+
+F:\Docker\1. docker basic\3 Container Interactive mode\python-app-starting-setup>docker ps -a
+CONTAINER ID   IMAGE          COMMAND                  CREATED          STATUS                        PORTS     NAMES
+49ba9f142090   c29c00667fa1   "docker-entrypoint.s…"   49 minutes ago   Exited (137) 30 minutes ago             cranky_lamport

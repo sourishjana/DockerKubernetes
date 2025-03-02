@@ -1,0 +1,48 @@
+
+ADD CONTAINER NAMES:
+
+> docker run --help
+
+> docker run -p 3000:80 -d --rm --name goalsapp c29c00667fa1
+
+> docker ps -a
+
+CONTAINER ID   IMAGE          COMMAND                  CREATED             STATUS                        PORTS                  NAMES
+61ea11f15398   c29c00667fa1   "docker-entrypoint.s…"   8 seconds ago       Up 8 seconds                  0.0.0.0:3000->80/tcp   goalsapp
+
+
+
+ADDING IMAGE NAMES AND TAGS:
+
+In case of images we have name:tag
+
+name here is the image group and tag is a specific version of the image group
+
+e.g 
+FROM node
+
+here node is a image name but also we have image tags for this one also
+
+like 
+FROM node:14.3.4
+
+to download a specific image
+
+In order to add a name and tag: name:version
+
+> docker build -t goalsappimage:v1 .
+
+F:\Docker\1. docker basic\1 Container details>docker images
+REPOSITORY      TAG       IMAGE ID       CREATED          SIZE
+goalsappimage   v1        9e8b8cd0cdec   14 seconds ago   1.13GB
+
+Now create an image using the image:
+
+> docker run -p 3000:80 -d --rm --name goalsapp goalsappimage:v1
+
+> docker stop goalsapp
+
+
+
+
+

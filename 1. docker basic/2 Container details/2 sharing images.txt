@@ -1,0 +1,41 @@
+There are 2 ways you can share you images:
+
+1. Sharing your Docker file with your code ina zip format as done in the course
+    In this case you have to run [docker build .] cmd then create containers out of it.
+2. Sharing a build image
+    In this case we can directly download image and create containers, do not have to build the image.
+
+
+Pushing Images to a Registry:
+there are 2 places where you can push images:
+
+1. Docker Hub -> Free usage possible and is the official docker registry. Public private official images 
+2. Private registry -> Any provider you can use like Azure, you have only have you own private images and share it with team.
+        Share: docker push image_name
+        Use: docker pull image_name
+
+
+Create a repo in the Docker Hub
+Here you will see a cmd -> docker push sourishjana/demoimages:tagname
+
+e.g demoimages
+
+if I want to push any image we have to give a proper name for that like
+demoimages/image_name:image_tag
+
+You can name it in 2 ways:
+1. When we create a image -> > docker build -t sourishjana/demoimages:v1 .
+2. Rename existing image -> > docker tag goalsappimage:v1 sourishjana/demoimages:v1
+    In this case we create a replica for existing image
+
+
+Step1:
+> docker login
+Authenticating with existing credentials...
+Login Succeeded
+
+Step2:
+> docker push sourishjana/demoimages:v1
+
+
+

@@ -1,0 +1,40 @@
+Create Image:
+>docker build -t feedbackappimage:v1 .
+
+Create Container:
+>docker run -p 3000:80 -d --rm --name feedbackapp feedbackappimage:v1
+
+
+When we create a new feedback with a unique title then it will goto feedback folder
+When we create a new feedback with a already existing title it will go into the temp folder
+
+So here we have 2 kind of data -> 
+1. temporary data -> which we donot care if it gets deleted 
+2. We have our permanent data which we need even when our container is not up
+
+
+When we create a new feedback using the app we can not see it in local machine -> because the file will be created inside the container and there is no relation to our local env as everything is happening inside the container.
+
+goto http://localhost:3000/feedback/hello.txt
+to see the file we created.
+
+
+
+
+PROBLEM:
+
+> docker stop feedbackapp
+> docker rmi feedbackapp
+
+Now if we stop the container and as we created the container with -rm flg so it will also remove the container also.
+In this case we had our file inside the container but removing the container will delete the file also.
+
+NOTE: Stopping and restarting the container will not affect the files as container is still there.
+
+So there is a problem with our data if we need it again.
+
+
+
+
+
+

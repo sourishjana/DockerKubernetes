@@ -1,0 +1,118 @@
+
+Bind Mount -> This thing is used when dev is debugging code and everytime dev changes code he needs to create a new image and a new container. In order to overcome this we need something real time update whenever we make any code changes.
+
+Here comes the Bind mounts/Code Sharing using volume
+
+for that we already had one cmd
+> docker run -p 3000:80 -d --rm --name feedbackapp -v appvolume:/app/feedback feedbackappimage:v1
+
+Where the first -v is
+-v volume_name:container_file_storage_location
+
+some volumne is mapped to a container storage location
+
+For Bind Mount we need to map our actual code folder location to container code folder location
+
+-> Our Current Code folder location: F:\Docker\2. Managing data and working with Volumns\data-volumes-01-starting-setup
+-> Container Code folder location:   /app
+
+So here we need to add another volume for that.
+
+Also we will remove the -d flag as we need logs.
+
+
+
+> docker run -p 3000:80 --rm --name feedbackapp -v appvolume:/app/feedback -v "F:\Docker\2. Managing data and working with Volumns\data-volumes-01-starting-setup:/app" feedbackappimage:v1
+
+Output:
+internal/modules/cjs/loader.js:934
+  throw err;
+  ^
+
+Error: Cannot find module 'express'
+
+
+Error comes because now our actual code donot have any node_modules folder right: Below is the problem
+
+FROM node:14
+
+WORKDIR /app
+
+COPY package.json /app          -> Copies only the package.json
+
+RUN npm install                 -> Install all the npm packages inside node_modules folder
+
+COPY . /app                     -> as we used bind mounts it uses our local code so it removes the node_modules folder
+
+EXPOSE 80
+
+CMD [ "node", "server.js" ]     -> Application crashes as node_modules are not there
+
+
+
+Now for this to work we have to add another volume for the node_modules which should persist and donot change even if we change our local code.
+
+For that we need another -v flag and specify the path which should persist
+e.g -v /app/node_modules
+
+
+> docker run -p 3000:80 --rm --name feedbackapp -v appvolume:/app/feedback -v "F:\Docker\2. Managing data and working with Volumns\data-volumes-01-starting-setup:/app" -v /app/node_modules feedbackappimage:v1
+
+
+NOTE: for all container paths -> longer path in volumes does have the higher priority than smaller path so here in the above example the /app will be overridden by /app/feedback so we will not copy our local logs to container logs. In our case our code will work fine.
+
+
+
+Now you have three volumes: 
+1. Named Volume: http://localhost:3000/feedback/hello.txt
+2. Bind Mount volume: takes updates from "F:\Docker\2. Managing data and working with Volumns\data-volumes-01-starting-setup" local path 
+3. An Anonymous volume: /app/node_modules
+
+
+
+For logs we have added nodemon and added scripts as "npm start" so we need to remove containers, images and again create them.
+Now you will see nodemon logs
+
+> docker stop feedbackapp
+> docker rmi feedbackappimage:v1
+> docker build -t feedbackappimage:v1 .
+> docker run -p 3000:80 --rm --name feedbackapp -v appvolume:/app/feedback -v "F:\Docker\2. Managing data and working with Volumns\data-volumes-01-starting-setup:/app" -v /app/node_modules feedbackappimage:v1
+
+
+Also in the end you can use detached mode
+
+> docker run -p 3000:80 -d --rm --name feedbackapp -v appvolume:/app/feedback -v "F:\Docker\2. Managing data and working with Volumns\data-volumes-01-starting-setup:/app" -v /app/node_modules feedbackappimage:v1
+
+> docker logs feedbackapp
+
+> docker volume ls    
+DRIVER    VOLUME NAME
+local     4431ea4cdad751c2b0002bdcbaaca2b33305c2ea3e6b6e19a17f52450efac60b
+local     appvolume
+
+
+Bind mounts are not displayed in volumes other that that we have 2 volumes right so that is printed above.
+
+> docker stop feedbackapp
+
+> docker volume ls        
+DRIVER    VOLUME NAME
+local     appvolume
+
+Now as you can see the named volumes persist even when container is removed.
+
+
+
+
+
+Managing volume:
+
+> docker volume --help
+
+Commands:
+  create      Create a volume
+  inspect     Display detailed information on one or more volumes
+  ls          List volumes
+  prune       Remove unused local volumes
+  rm          Remove one or more volumes
+

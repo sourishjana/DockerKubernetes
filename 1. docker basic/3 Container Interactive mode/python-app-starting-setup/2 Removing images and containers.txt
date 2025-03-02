@@ -1,0 +1,20 @@
+
+Get and delete a container:
+
+>docker ps -a
+
+>docker rm c2a6f0653902
+
+To remove multiple containers
+>docker rm container_id1 container_id2 container_id3
+
+Get and delete a image:
+
+>docker images
+
+>docker rmi c29c00667fa1
+
+To remove multiple images
+>docker rmi image_id1 image_id2 image_id3
+
+

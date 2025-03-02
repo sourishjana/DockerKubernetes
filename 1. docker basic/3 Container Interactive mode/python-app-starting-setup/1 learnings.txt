@@ -1,0 +1,27 @@
+Now Docker is not only used for web servers and ports and all we can also run normal console ip op applications here using the interactive mode
+
+For example our py file
+
+Build your image:
+> docker build . 
+
+Run your image:
+You can get the -i for interactive mode and -t to open a termial
+> docker run --help
+
+As here we will not be requiring to expose any port we can just do docker run:
+> docker run -i -t image_id
+
+If you see the container it is exited after completing the cmd
+> docker ps -a
+CONTAINER ID   IMAGE          COMMAND                  CREATED          STATUS                        PORTS     NAMES
+c2a6f0653902   65cb987aef9b   "python rng.py"          3 minutes ago    Exited (0) 3 minutes ago                epic_satoshi
+
+
+Again if you want to run it once again you can do it using 
+-a for attahc mode and -i for interactive mode:
+
+>docker start -a -i container_id
+
+
+

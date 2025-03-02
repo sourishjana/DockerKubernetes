@@ -1,0 +1,45 @@
+name: composeapp
+services:
+  mongodb:
+    image: 'mongo'
+    volumes:
+      - data:/data/db # names volumns must be specified at the bottom of docker-compose file
+    # environment: # Some other ways of declaring env variables
+    #   #- MONGO_INITDB_ROOT_USERNAME=max
+    #   - MONGO_INITDB_ROOT_USERNAME: sourish
+    #   - MONGO_INITDB_ROOT_PASSWORD: secret
+    env_file:
+      - ./env/mongo.env
+    # networks:
+    #   - goals-net # If you want to specify your own network you can do that
+  backend:
+    build: ./backend
+    # build: 
+    #   context: ./backend
+    #   dockerfile: Dockerfile-dev # In case if your docker file name is other than Dockerfile
+    ports:
+      - '80:80'
+    volumes:
+      - logs:/app/logs # names volumns must be specified at the bottom of docker-compose file
+      - ./backend:/app # here for bind mount we were previosly using absolute path, here we can use relative path
+      - /app/node_modules # Anonymous volumes
+    env_file:
+      - ./env/backend.env
+    depends_on: # This is to specify that before running this container mongodb container must be up and running
+      - mongodb # name of the service in the docker-compose file only
+
+  frontend:
+    build: ./frontend
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./frontend/src:/app/src
+    stdin_open: true # opens input -> same as -i
+    tty: true # for an interactive shell same as -t
+    depends_on:
+      - backend
+
+
+volumes:
+  data:
+  logs:

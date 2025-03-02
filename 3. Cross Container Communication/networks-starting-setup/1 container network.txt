@@ -1,0 +1,95 @@
+There are 3 kinds of network communications for a container:
+1. container to Local Host machine
+2. container to https://example.com i.e outside world
+3. container to other containers.
+
+
+1. container to Local Host machine:
+
+replace the IP Address to: host.docker.internal
+
+mongoose.connect(
+  'mongodb://host.docker.internal:27017/swfavorites',
+  { useNewUrlParser: true },
+  (err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      app.listen(3000);
+    }
+  }
+);
+
+
+2. container to https://example.com i.e outside world:
+
+For this we donot have to do anything
+
+
+3. container to other containers:
+
+For Mongodb let us create a container first. For this we can use an exiting image from dockerhub i.e mongo.
+So directly create a container.
+
+> docker run -d --name mongodb mongo
+
+> docker inspect mongodb
+
+In the output there will be a part like
+"IPAddress": "172.17.0.3"
+
+we will be directly using this IP address
+
+mongoose.connect(
+  'mongodb://172.17.0.3:27017/swfavorites',
+  { useNewUrlParser: true },
+  (err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      app.listen(3000);
+    }
+  }
+);
+
+> docker build -t favappimage:v1 .
+> docker run -d -p 3000:3000 -rm --name favapp favappimage:v1
+
+And this will work fine now.
+
+
+There is another way for container to container communication:
+
+Using shared network:
+For that we need to first create our own network and all the container should use this network only.
+
+> docker network --help
+> docker network create fav-net
+
+> docker stop favapp mongodb
+> docker rm mongodb
+
+In order to create a container using a specific network we have to use.
+--network fav-net
+
+> docker run -d --network fav-net --name mongodb mongo
+
+Now we can use the container name as IP Address for the conn string for mongodb container interaction.
+
+mongoose.connect(
+  'mongodb://mongodb:27017/swfavorites',
+  { useNewUrlParser: true },
+  (err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      app.listen(3000);
+    }
+  }
+);
+
+> docker rmi favappimage:v1
+> docker build -t favappimage:v1 .
+> docker run -d -p 3000:3000 --rm --network fav-net --name favapp favappimage:v1
+
+

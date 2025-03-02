@@ -1,0 +1,9 @@
+
+> docker images
+
+> docker image --help
+
+> docker image inspect image_id
+
+
+You can see some important things like environemnt: linux, layers of the image

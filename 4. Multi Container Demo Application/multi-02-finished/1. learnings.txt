@@ -1,0 +1,70 @@
+
+Mongodb:
+
+> docker run -d -e MONGO_INITDB_ROOT_USERNAME=sourish -e MONGO_INITDB_ROOT_PASSWORD=secret --rm --network goals-net --name mongodb mongo:latest
+
+
+Backend:
+
+> cd backend
+
+> docker build -t goalsbackendimage:v1 .
+
+> docker run -d --rm --env-file ./.env -v logs:/app/logs -v "F:\Docker\4. Multi Container Demo Application\multi-02-finished\backend:/app" -v /app/node_modules -p 80:80 --network goals-net --name goalsbackend goalsbackendimage:v1
+
+
+Frontend:
+
+> cd frontend
+
+> docker build -t goalsfrontendimage:v1 .
+
+> docker run -it --rm -d -p 3000:3000 -v "F:\Docker\4. Multi Container Demo Application\multi-02-finished\frontend\src:/app/src" --name goalsfrontend goalsfrontendimage:v1
+
+
+
+
+
+
+
+EXPLAINATION:--------------------------------------------------------------------------------------------------------------
+
+mongodb:
+
+Previously we seen that for normally creating mongodb we just use common network using mongo image.
+Detached mode,remove when stopped, network, name, image name we have used
+
+>docker run -d --rm --network goals-net --name mongodb mongo:latest
+
+Now if we want to have security for our db then we need to use username password. 
+Now how to add that we will get some clue in the image in dockerhub image documentations
+For that we need to add some env variables to specify what should be our name and password.
+
+> docker run -d -e MONGO_INITDB_ROOT_USERNAME=sourish -e MONGO_INITDB_ROOT_PASSWORD=secret --rm --network goals-net --name mongodb mongo:latest
+
+
+backend:
+
+Now we need to create a .env file and specify the username and password and use that in the url which we use to access the mongodb container.
+
+Detached mode, env files, named volume for logs, bind mount for code, anonymous volume to exclude node_modules, port, network, name, image name -> Used to create 
+
+> docker run -d --rm --env-file ./.env -v "F:\Docker\4. Multi Container Demo Application\multi-02-finished\backend:/app"  -v logs:/app/logs -v /app/node_modules -p 80:80 --network goals-net --name goalsbackend goalsbackendimage:v1
+
+
+frontend:
+
+for frontedn it is a little bit ticky because the way applications like react works. we cannot just create the container and expect it to be run on a certain port. It is not a server but it is an application which is runned by a server on port 3000 which is reacts normal port.
+
+Also in order to communicate with backend it doesnot require to be in any network so we cannot use network here.
+WHY: A common network isn't typically used to host a React app in a Docker container because a React application runs in the user's browser, which doesn't have access to the internal Docker network, meaning it can't directly reach other containers on the same network unless you explicitly expose a port.
+
+Thats why we need to expose the port from backend in port 80 so that react can have access to it like http://localhost:80/goals
+
+
+NOTE: We must run a react app in interactive mode.
+
+interactive mode,detached mode,port,bind mount,name of container, image name -> are used here.
+
+
+> docker run -it --rm -d -p 3000:3000 -v "F:\Docker\4. Multi Container Demo Application\multi-02-finished\frontend\src:/app/src" --name goalsfrontend goalsfrontendimage:v1

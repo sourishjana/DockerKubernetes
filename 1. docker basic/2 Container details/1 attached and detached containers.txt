@@ -1,0 +1,39 @@
+ATTACHED and DETACHED CONATAINERS:
+
+> docker run -p 3000:80 image_id            -> Attached Conatiner
+> docker start container_id                 -> Detached container
+
+
+Whenever we do [docker run -p 3000:80 image_id] it keeps the cmd open untill you forcefully exit and also print logs if present in our container files 
+If we see in server.js file line 41 we have a log statement -> whenever we add any thing in UI we will see the log
+So in case of attached containers we can see the log in console
+
+
+When we run [docker start container_id] we can see just a output and cmd is exited but container is running in the backend.
+
+you can check it using:
+> docker ps
+
+stop container using:
+> docker stop container_id
+
+WE CAN ALSO CONFIGURE IT:
+In order to run a container mode use -d flag and it will not show logs further
+> docker run -p 5000:80 -d container_id
+
+In order to change a already running container to attach mode 
+> docker attach container_id
+
+Also if your container is not attached then also its fine we can check logs of that conatiner:
+> docker logs container_id
+
+If you want to know about more commands:
+> docker logs --help
+
+
+We can attach a container using: -f means follow
+> docker logs -f container_id
+
+Starting an already stopped container in attach mode:
+> docker start -a container_id 
+
