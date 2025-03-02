@@ -1,0 +1,43 @@
+In order to update deployment:
+1. Create a new image with a new tag (Creating image with new tag is IMPORTANT, without that deployment will not get updated)
+2. Push to Dockerhub
+3. set image cmd to update image in deployment
+
+> docker build -t kub-demo-app .
+
+> docker push sourishjana/demoimages:latest
+
+> kubectl describe deployment first-app
+
+  Containers:
+   demoimages:
+    Image:         sourishjana/demoimages
+    Port:          <none>
+
+
+Here you can see the container name inside the deployment.
+In our case it is demoimages
+
+kubectl set image deployment/deployment_name container_name=dockerhub_image_name
+
+> kubectl set image deployment/first-app demoimages=sourishjana/demoimages
+
+But still it will not work because image must have a new tag to be updated.
+
+
+
+CREATE A NEW IMAGE WITH NEW TAG:
+
+> docker build -t kub-demo-app:v1 .
+
+> docker tag kub-demo-app:v1 sourishjana/demoimages:v1
+
+> docker push sourishjana/demoimages:v1
+
+> kubectl set image deployment/first-app demoimages=sourishjana/demoimages:v1
+deployment.apps/first-app image updated
+
+> kubectl rollout status deployment/first-app
+deployment "first-app" successfully rolled out
+
+

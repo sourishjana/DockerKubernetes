@@ -1,0 +1,52 @@
+ANOTHER FEATURE OF KUBERNETES:
+
+Scaling:
+Now if we want that there should be 3 replica of the same pods in order to get more user availability and balancing user traffic then we can also scale up our pods.
+
+> kubectl scale deployment/first-app --replicas=3
+deployment.apps/first-app scaled
+
+> kubectl get pods
+NAME                         READY   STATUS              RESTARTS      AGE
+first-app-59c8f5657f-8wlqj   0/1     ContainerCreating   0             4s
+first-app-59c8f5657f-czl8f   0/1     ContainerCreating   0             4s
+first-app-59c8f5657f-dkzql   1/1     Running             3 (13m ago)   49m
+
+> kubectl get pods
+NAME                         READY   STATUS    RESTARTS      AGE
+first-app-59c8f5657f-8wlqj   1/1     Running   0             4m49s
+first-app-59c8f5657f-czl8f   1/1     Running   0             4m49s
+first-app-59c8f5657f-dkzql   1/1     Running   3 (17m ago)   54m
+
+
+Now if you crash the application by going to http://127.0.0.1:62320/error
+immediately if you goto http://127.0.0.1:62320 then you can see your app running, as only one pod got down but other 2 pods are still running.
+
+> kubectl get pods
+NAME                         READY   STATUS    RESTARTS     AGE
+first-app-59c8f5657f-8wlqj   0/1     Error     0            6m14s
+first-app-59c8f5657f-czl8f   1/1     Running   1 (8s ago)   6m14s
+first-app-59c8f5657f-dkzql   0/1     Error     3            56m
+
+You can see still one pod is running.
+
+Conclusion:
+1. the availability increases. 
+2. the user load got distributed across multiple pods as one goes down traffic is automatically redirected to another pod.
+
+
+
+
+again:
+
+> kubectl scale deployment/first-app --replicas=1
+deployment.apps/first-app scaled
+
+You will see 2 pods will be terminating:
+> kubectl get pods
+NAME                         READY   STATUS        RESTARTS       AGE
+first-app-59c8f5657f-8wlqj   1/1     Running       2 (4m3s ago)   10m
+first-app-59c8f5657f-czl8f   1/1     Terminating   2 (4m5s ago)   10m
+first-app-59c8f5657f-dkzql   1/1     Terminating   5 (4m4s ago)   60m
+
+

@@ -1,0 +1,57 @@
+
+Now the problem is we have the pod and container inside the pod but how do we access it. Because it is running inside the VM kubernetes cluster.
+
+For that we need services.
+For Kubernetes there is no way to talk to the pods, for that we need to have services so that it can allow a port to be exposed to the outside world.
+Also Pods are ephimeral -> that means they can go down and can be deleted and recreated in that case the IP changes all time. So that is one of the reasons that why we need services so that we can expose a stable port number for that pod to the out side world.
+
+3 types:
+1. ClusterIP -> It exposes a port to the cluster. So it will only be reachable inside the cluster.
+2. NodePort -> It exposes a port of the worker node on which our deployment is running.
+3. LoadBalancer -> It also exposes a port with the help of a load balancer which can balance incoming traffic to the pods       present in the service, also we will learn that deployment can auto scale the pods.
+
+
+So here we will be using LoadBalancer to expose our deployment.
+--type=LoadBalancer  -> type of service you need
+--port=8080          -> port which need to be get exposed
+
+
+> kubectl expose deployment first-app --type=LoadBalancer --port=8080
+service/first-app exposed
+
+> kubectl get services
+NAME         TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+first-app    LoadBalancer   10.104.144.99   <pending>     8080:32101/TCP   26s
+kubernetes   ClusterIP      10.96.0.1       <none>        443/TCP          126m
+
+
+Here you can see the service we created and there is a ClusterIP service which was already present there.
+If we do deployment on any cloud provider like aws,azure. we will also get to see the EXTERNAL-IP for now we cannot see as it is a VM created by us.
+
+So for azure like cloud providers you will directly get the exposed IP address in the EXTERNAL-IP column. In that case we can directly use it.
+
+But as we are using minikube we have to write another command to get the port on which the deploymentgot exposed.
+
+> minikube service first-app
+|-----------|-----------|-------------|---------------------------|
+| NAMESPACE |   NAME    | TARGET PORT |            URL            |
+|-----------|-----------|-------------|---------------------------|
+| default   | first-app |        8080 | http://192.168.49.2:32101 |
+|-----------|-----------|-------------|---------------------------|
+🏃  Starting tunnel for service first-app.
+|-----------|-----------|-------------|------------------------|
+| NAMESPACE |   NAME    | TARGET PORT |          URL           |
+|-----------|-----------|-------------|------------------------|
+| default   | first-app |             | http://127.0.0.1:62115 |
+|-----------|-----------|-------------|------------------------|
+🎉  Opening service default/first-app in default browser...
+❗  Because you are using a Docker driver on windows, the terminal needs to be open to run it.
+
+
+NOTE: Keep it running in a cmd prompt.
+
+you application is up on http://127.0.0.1:62320/
+
+
+
+

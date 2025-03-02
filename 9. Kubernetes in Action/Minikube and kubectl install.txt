@@ -1,0 +1,52 @@
+First Install Kubectl:
+
+https://kubernetes.io/docs/tasks/tools/install-kubectl-windows/
+
+Use Curl to install:
+>curl.exe -LO "https://dl.k8s.io/release/v1.32.0/bin/windows/amd64/kubectl.exe"
+
+in order to verify installation:
+>kubectl version --client
+
+
+
+Goto this link to install minikube
+
+https://minikube.sigs.k8s.io/docs/start/?arch=%2Fwindows%2Fx86-64%2Fstable%2Fwindows+package+manager
+
+Install using Windows package manager
+
+Minikube generally runs with a driver to create a actual cluster, it requires a hypervisor which can seperate a VM from our local machine, as a hypervisor we here will be using docker.
+But there are lot of diff options hyperv, virualbox, etc
+goto this page:
+https://minikube.sigs.k8s.io/docs/drivers/docker/
+
+>minikube config set driver docker
+
+>minikube start --driver=docker
+
+>minikube delete
+
+>minikube start
+
+>minikube status
+minikube
+type: Control Plane
+host: Running
+kubelet: Running
+apiserver: Running
+kubeconfig: Configured
+
+It should look like this for the above cmd
+
+>minikube dashboard
+
+It will run a dashboard where you can see pods, cluster, nodes, etc
+
+Here we can have our kubernetes cluster.
+
+
+
+
+
+

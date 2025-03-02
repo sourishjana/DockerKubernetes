@@ -1,0 +1,59 @@
+First thing will be the same is to create a image and add the image to docker hub.
+
+Since kubenetes cluster that we have currently is ideally a VM which is seperate from our local machine.
+So it does not know anything about the image that we create locally in docker.
+So we need to push the image to dockerhub
+
+If we create a image :
+
+> docker build -t kub-demo-app .
+
+> kubectl create deployment first-app --image=kub-demo-app
+deployment.apps/first-app created
+
+If get all your deployments you will find 0/1 running this is because your deployment counld not find a image in its VM
+
+> kubectl get deployments
+NAME        READY   UP-TO-DATE   AVAILABLE   AGE
+first-app   0/1     1            0           14s
+
+> kubectl get pods
+NAME                        READY   STATUS         RESTARTS   AGE
+first-app-59cf6648f-pmvrr   0/1     ErrImagePull   0          3m43s
+
+Here we can clearly see the err is imagepull error
+
+So now delete the deployment
+
+> kubectl delete deployment first-app
+deployment.apps "first-app" deleted
+
+
+We already have a repesitory in dockerhub i.e sourishjana\demoimages
+goto dockerhub and delete all existing images in that repo.
+
+> docker tag kub-demo-app sourishjana/demoimages
+
+> docker push sourishjana/demoimages
+
+> kubectl create deployment first-app --image=sourishjana/demoimages
+deployment.apps/first-app created
+
+> kubectl describe deployment first-app
+
+It will take some time to make the image running so give some time and then run
+
+> kubectl get deployments
+NAME        READY   UP-TO-DATE   AVAILABLE   AGE
+first-app   1/1     1            1           7m12s
+
+Now you can goto the kubernetes cluster and see all the deployments, pods, replica sets there:
+> minikube dashboard
+http://127.0.0.1:58324/api/v1/namespaces/kubernetes-dashboard/services/http:kubernetes-dashboard:/proxy/#/workloads?namespace=default
+
+
+
+
+
+
+

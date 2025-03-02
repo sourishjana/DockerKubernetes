@@ -1,0 +1,20 @@
+
+IMPORTANT KUBERNETES FEATURE:
+
+If you open app.js file you can see there is one api which can crash the application.
+
+app.get('/error', (req, res) => {
+  process.exit(1);
+});
+
+Now if you goto the url: http://127.0.0.1:62320/error
+
+then you application will crash but within some time only if you again goto http://127.0.0.1:62320/ you can see your application running how does it happen.
+
+> kubectl get pods
+NAME                         READY   STATUS    RESTARTS      AGE
+first-app-59c8f5657f-dkzql   1/1     Running   3 (33s ago)   37m
+
+Here you can see RESTARTS is 3 that means the application creshed 3 times and the deployment is automatically making the application up. This is one of the important feature of Kubernetes.
+this thing never worked on docker when we used to run a container using docker run, there if the application crashes then container was stopping. this is the advantage of kubenetes.
+
