@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-service # name of the service
+spec:
+  selector: # selector is used to add labels of a pod, because service exposes port of a pod so it works on service level
+    app: first-app-pod
+    tier: backend
+  ports: # we can also add multiple ports to be exposed so it is a list 
+    - protocol: TCP # by default it is TCP
+      port: 80 # port on which app must be exposed
+      targetPort: 8080 # my application port which need to be exposed
+  type: LoadBalancer # LoadBalancer/ClusterIP/NodePort

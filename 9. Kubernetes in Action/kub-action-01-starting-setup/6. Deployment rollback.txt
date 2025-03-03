@@ -1,0 +1,81 @@
+If now suppose we try to update deployment with wrong image tag then it will fail right.
+
+> kubectl set image deployment/first-app demoimages=sourishjana/demoimages:v3
+deployment.apps/first-app image updated
+
+> kubectl rollout status deployment/first-app
+Waiting for deployment "first-app" rollout to finish: 1 old replicas are pending termination...
+
+> kubectl get pods
+NAME                         READY   STATUS             RESTARTS      AGE
+first-app-648744b49d-fnmpg   1/1     Running            1 (12m ago)   11h
+first-app-7c4c5f964-2mp84    0/1     ImagePullBackOff   0             24s
+
+If you see Kubernetes trying to update image but still old pod is running. So untill the new pods with updated image is not created the old one is not deleted.
+
+If you run your app in another terminal
+> minikube service first-app
+
+You can still see you app up and running 
+
+So all the image pulling and update happing in under the hoods.
+
+So we need to rollback our changes:
+
+> kubectl rollout undo deployment/first-app
+deployment.apps/first-app rolled back
+
+> kubectl rollout status deployment/first-app
+deployment "first-app" successfully rolled out
+
+> kubectl get pods
+NAME                         READY   STATUS    RESTARTS      AGE
+first-app-648744b49d-fnmpg   1/1     Running   1 (18m ago)   11h
+
+now if we want to go back to a old deployment, we want to see the history of all the images we deployed:
+
+> kubectl rollout history deployment/first-app
+deployment.apps/first-app 
+REVISION  CHANGE-CAUSE
+3         <none>
+7         <none>
+8         <none>
+
+In order to see the specific revision history of a image use:
+
+> kubectl rollout history deployment/first-app --revision=3
+deployment.apps/first-app with revision #3
+Pod Template:
+  Labels:       app=first-app
+        pod-template-hash=59c8f5657f
+  Containers:
+   demoimages:
+    Image:      sourishjana/demoimages
+    Port:       <none>
+    Host Port:  <none>
+    Environment:        <none>
+    Mounts:     <none>
+  Volumes:      <none>
+  Node-Selectors:       <none>
+  Tolerations:  <none>
+
+In order to go back to the specific revision:
+
+> kubectl rollout undo deployment/first-app --to-revision=3
+deployment.apps/first-app rolled back
+
+
+Here we learned another important feature of kubernetes that it can also support rollback by keepin the running deployment as it is.
+
+
+
+
+DELETE DEPLOYMENTS:
+
+> kubectl delete deployment first-app
+
+> kubectl get deployments
+No resources found in default namespace.
+
+> kubectl get pods
+No resources found in default namespace.

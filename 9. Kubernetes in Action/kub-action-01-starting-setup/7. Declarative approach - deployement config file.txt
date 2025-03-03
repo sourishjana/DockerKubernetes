@@ -1,0 +1,58 @@
+Instead of running long commands we can also use a config file to declare the deployment and run the config file same as docker compose file in docker.
+
+GOTO: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+
+for the template
+
+There is a deployment.yaml file here in this directory which you must refer.
+You can name the file anything you want just end with .yaml 
+
+
+deployment.yaml file:
+------------------------------------------------------------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: first-app-deployment
+spec:
+  replicas: 1
+  selector: # every deployment watches all the pods which are under this deployment
+    matchLabels: # in order to specify the pods which will be controlled by the deployment are specified inside this spec
+      # this must be same as the labels in the pods
+      app: first-app-pod
+      tier: backend
+  template: # This template always contains details of the POD i.e Kind: Pod
+    metadata:
+      labels: # a pod can have multiple labels like here we have given 2, you can name it whatever you want.
+        app: first-app-pod
+        tier: backend
+    spec:
+      containers: # So we also need to specify the container configurations in the pod
+      # now you can have multiple containers in the same pods thats why it is represented by - i.e list 
+      - name: first-app-container
+        image: sourishjana/demoimages:v1 #image name of dockerhub
+------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+> kubectl apply -f=deployment.yaml
+deployment.apps/first-app-deployment created
+
+> kubectl get pods
+NAME                                    READY   STATUS    RESTARTS   AGE
+first-app-deployment-647cdcc755-k98tt   1/1     Running   0          6s
+
+> kubectl get deployments
+NAME                   READY   UP-TO-DATE   AVAILABLE   AGE
+first-app-deployment   1/1     1            1           2m40s
+
+
+
+
+But still after createing a deployment we cannot see our app running as we still havent configured anys ervice
+
+
+
+

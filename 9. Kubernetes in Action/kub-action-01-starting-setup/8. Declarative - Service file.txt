@@ -1,0 +1,64 @@
+Now we will be adding service in declarative way:
+
+GOTO: https://kubernetes.io/docs/concepts/services-networking/service/
+
+for the template
+
+
+First delete existing service:
+
+> kubectl get services
+NAME         TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+first-app    LoadBalancer   10.104.144.99   <pending>     8080:32101/TCP   13h
+kubernetes   ClusterIP      10.96.0.1       <none>        443/TCP          15h
+
+> kubectl delete service first-app
+service "first-app" deleted
+
+
+Create a service.yaml file:
+---------------------------------------------------------------------------------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-service # name of the service
+spec:
+  selector: # selector is used to add labels of a pod, because service exposes port of a pod so it works on service level
+    app: first-app-pod
+    tier: backend
+  ports: # we can also add multiple ports to be exposed so it is a list 
+    - protocol: TCP # by default it is TCP
+      port: 80 # port on which app must be exposed
+      targetPort: 8080 # my application port which need to be exposed
+  type: LoadBalancer # LoadBalancer/ClusterIP/NodePort
+---------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+> kubectl apply -f service.yaml
+service/app-service created
+
+> kubectl get services
+NAME          TYPE           CLUSTER-IP    EXTERNAL-IP   PORT(S)        AGE
+app-service   LoadBalancer   10.99.82.41   <pending>     80:31279/TCP   3s
+kubernetes    ClusterIP      10.96.0.1     <none>        443/TCP        15h
+
+In order to now see our app:
+minikube service service_name
+
+> minikube service app-service
+|-----------|-------------|-------------|---------------------------|
+| NAMESPACE |    NAME     | TARGET PORT |            URL            |
+|-----------|-------------|-------------|---------------------------|
+| default   | app-service |          80 | http://192.168.49.2:31279 |
+|-----------|-------------|-------------|---------------------------|
+🏃  Starting tunnel for service app-service.
+|-----------|-------------|-------------|------------------------|
+| NAMESPACE |    NAME     | TARGET PORT |          URL           |
+|-----------|-------------|-------------|------------------------|
+| default   | app-service |             | http://127.0.0.1:61426 |
+|-----------|-------------|-------------|------------------------|
+🎉  Opening service default/app-service in default browser...
+❗  Because you are using a Docker driver on windows, the terminal needs to be open to run it.
+

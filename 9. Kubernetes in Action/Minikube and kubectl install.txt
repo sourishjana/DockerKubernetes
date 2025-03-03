@@ -47,6 +47,14 @@ Here we can have our kubernetes cluster.
 
 
 
+After you stop everything next time you start laptop:
+
+> minikube start --driver=docker
+> minikube status
+> minikube dashboard
+
+
+
 
 
 
