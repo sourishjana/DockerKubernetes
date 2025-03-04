@@ -1,0 +1,33 @@
+> docker build -t kub-volume:v1 .
+
+We already had one dockerhub image v1 in sourishjana/demoimages repo. Now as know kubernetes will only pull new image if the version is different otherwise it will use the already pulled image.
+we will be creating new tag v2 in the same repo sourishjana/demoimages
+
+> docker tag kub-volume:v1 sourishjana/demoimages:v2
+
+> docker push sourishjana/demoimages:v2
+
+
+Now prepare your yaml files for deployment and service
+
+
+> kubectl apply -f deployment.yaml -f service.yaml
+deployment.apps/story-deployment created
+service/story-service created
+
+
+> minikube service story-service
+|-----------|---------------|-------------|---------------------------|
+| NAMESPACE |     NAME      | TARGET PORT |            URL            |
+|-----------|---------------|-------------|---------------------------|
+| default   | story-service |          80 | http://192.168.49.2:31310 |
+|-----------|---------------|-------------|---------------------------|
+🏃  Starting tunnel for service story-service.
+|-----------|---------------|-------------|------------------------|
+| NAMESPACE |     NAME      | TARGET PORT |          URL           |
+|-----------|---------------|-------------|------------------------|
+| default   | story-service |             | http://127.0.0.1:63760 |
+|-----------|---------------|-------------|------------------------|
+🎉  Opening service default/story-service in default browser...
+❗  Because you are using a Docker driver on windows, the terminal needs to be open to run it.
+

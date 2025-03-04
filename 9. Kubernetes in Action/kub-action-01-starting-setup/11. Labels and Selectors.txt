@@ -1,0 +1,62 @@
+We can also add labels to deployments and services:
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-service 
+  labels: 
+    environment: dev
+spec:
+  selector: 
+    app: first-app-pod
+    tier: backend
+  ports: 
+    - protocol: TCP 
+      port: 80
+      targetPort: 8080 
+  type: LoadBalancer
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: first-app-deployment
+  labels: 
+    environment: dev
+spec:
+  replicas: 3
+  selector: 
+    matchLabels: 
+      app: first-app-pod
+      tier: backend
+  template: 
+    metadata:
+      labels: 
+        app: first-app-pod
+        tier: backend
+    spec:
+      containers: 
+      - name: first-app-container
+        image: sourishjana/demoimages:v1 
+
+
+
+And then we can use them when we want to delete all these deployments services all together:
+
+> kubectl delete -f master-deployment.yaml
+service "app-service" deleted
+deployment.apps "first-app-deployment" deleted
+
+> kubectl apply -f master-deployment.yaml
+service/app-service created
+deployment.apps/first-app-deployment created
+
+Here we specified that we want to delete deployments and services with specific label.
+
+> kubectl delete deployments,services -l environment=dev
+deployment.apps "first-app-deployment" deleted
+service "app-service" deleted
+
+
+

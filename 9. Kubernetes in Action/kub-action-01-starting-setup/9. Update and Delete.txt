@@ -1,0 +1,29 @@
+If we just make some changes in the yaml files then we just need to run
+
+e.g I updated the replicas to 3 in deployment.yaml file.
+
+> kubectl apply -f deployment.yaml
+deployment.apps/first-app-deployment configured
+
+> kubectl get pods
+NAME                                    READY   STATUS    RESTARTS        AGE
+first-app-deployment-647cdcc755-jgwpb   1/1     Running   0               15s
+first-app-deployment-647cdcc755-k98tt   1/1     Running   1 (5m23s ago)   20h
+first-app-deployment-647cdcc755-qmtlt   1/1     Running   0               15s
+
+
+for deleteing :
+
+> kubectl delete -f deployment.yaml
+deployment.apps "first-app-deployment" deleted
+
+> kubectl get deployments
+No resources found in default namespace.
+
+
+Deleting multiple resources:
+
+> kubectl delete -f deployment.yaml -f service.yaml
+service "app-service" deleted
+Error from server (NotFound): error when deleting "deployment.yaml": deployments.apps "first-app-deployment" not found
+

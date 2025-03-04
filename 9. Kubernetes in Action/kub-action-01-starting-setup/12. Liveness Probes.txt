@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-service 
+  labels: 
+    environment: dev
+spec:
+  selector: 
+    app: first-app-pod
+    tier: backend
+  ports: 
+    - protocol: TCP 
+      port: 80
+      targetPort: 8080 
+  type: LoadBalancer
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: first-app-deployment
+  labels: 
+    environment: dev
+spec:
+  replicas: 3
+  selector: 
+    matchLabels: 
+      app: first-app-pod
+      tier: backend
+  template: 
+    metadata:
+      labels: 
+        app: first-app-pod
+        tier: backend
+    spec:
+      containers: 
+      - name: first-app-container
+        image: sourishjana/demoimages:v1 
+        livenessProbe:
+        httpGet:
+          path: /
+          port: 8080
+        initialDelaySeconds: 5
+        periodSeconds: 10
+
+
+Liveness probes in Kubernetes are used to check whether a running container is still alive and functioning properly. If a container becomes unresponsive or enters a deadlock state, the liveness probe detects it and instructs Kubernetes to restart the container, ensuring application availability and stability.
+
+This configuration checks url / on port 8080 every 10 seconds, with an initial delay of 5 seconds.
+
+
+Now the question is even if we do not specify this it will work as same right?
+We have seen that perviously.
+
+Not necessarily. If you do not specify a liveness probe, Kubernetes will not automatically detect if your application is stuck or unresponsive. The container will keep running even if the application inside it is not functioning properly.
+
+
+What Happens Without a Liveness Probe?
+1. If your application crashes entirely, Kubernetes will detect it only if the process exits and will restart it.
+2. However, if your application is stuck in a deadlock, unresponsive, or running but not serving traffic, Kubernetes won’t restart it automatically unless a liveness probe is defined.
+
+Scenario Where Liveness Probe is Essential
+Imagine a .NET Core API running inside a container.
+
+1. If the application encounters a deadlock or memory leak but does not crash, Kubernetes won’t restart it.
+2. With a liveness probe, Kubernetes can detect that the API is not responding and restart the container.
+
+
+
+
+
+imagepullpolicy:
+We can also have a imagepullpolicy : you can search it
+

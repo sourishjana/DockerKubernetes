@@ -2,8 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: first-app-deployment
+  labels: # we can add labels for deployments
+    environment: dev
 spec:
-  replicas: 1
+  replicas: 3
   selector: # every deployment watches all the pods which are under this deployment
     matchLabels: # in order to specify the pods which will be controlled by the deployment are specified inside this spec
       # this must be same as the labels in the pods

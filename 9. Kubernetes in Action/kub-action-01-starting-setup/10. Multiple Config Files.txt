@@ -1,0 +1,77 @@
+you can also specify multiplte configurations in one file also like:
+I have created a master-deployment.yaml where I have first put the service and then put the deployment and in between we have to then give a config seperator like '---' only 3 minuses.
+
+---------------------------------------------------------------------------------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-service 
+spec:
+  selector: 
+    app: first-app-pod
+    tier: backend
+  ports: 
+    - protocol: TCP 
+      port: 80
+      targetPort: 8080 
+  type: LoadBalancer
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: first-app-deployment
+spec:
+  replicas: 3
+  selector: 
+    matchLabels: 
+      app: first-app-pod
+      tier: backend
+  template: 
+    metadata:
+      labels: 
+        app: first-app-pod
+        tier: backend
+    spec:
+      containers: 
+      - name: first-app-container
+        image: sourishjana/demoimages:v1 
+---------------------------------------------------------------------------------------------------------------------------------
+
+> kubectl apply -f master-deployment.yaml
+service/app-service created
+deployment.apps/first-app-deployment created
+
+> kubectl get deployments
+NAME                   READY   UP-TO-DATE   AVAILABLE   AGE
+first-app-deployment   3/3     3            3           55s
+
+> kubectl get pods
+NAME                                    READY   STATUS    RESTARTS   AGE
+first-app-deployment-647cdcc755-2n48h   1/1     Running   0          67s
+first-app-deployment-647cdcc755-c6ds7   1/1     Running   0          67s
+first-app-deployment-647cdcc755-cc8k6   1/1     Running   0          67s
+
+> kubectl get services
+NAME          TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+app-service   LoadBalancer   10.111.124.17   <pending>     80:31520/TCP   94s
+kubernetes    ClusterIP      10.96.0.1       <none>        443/TCP        36h
+
+Everytime you delete sll these thing you need to start the server again. Because everytime diff IP address are generated.
+
+> minikube service app-service
+|-----------|-------------|-------------|---------------------------|
+| NAMESPACE |    NAME     | TARGET PORT |            URL            |
+|-----------|-------------|-------------|---------------------------|
+| default   | app-service |          80 | http://192.168.49.2:31520 |
+|-----------|-------------|-------------|---------------------------|
+🏃  Starting tunnel for service app-service.
+|-----------|-------------|-------------|------------------------|
+| NAMESPACE |    NAME     | TARGET PORT |          URL           |
+|-----------|-------------|-------------|------------------------|
+| default   | app-service |             | http://127.0.0.1:61889 |
+|-----------|-------------|-------------|------------------------|
+🎉  Opening service default/app-service in default browser...
+❗  Because you are using a Docker driver on windows, the terminal needs to be open to run it.
+
