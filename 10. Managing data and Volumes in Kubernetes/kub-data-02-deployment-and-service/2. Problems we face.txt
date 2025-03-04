@@ -1,0 +1,28 @@
+For this thig fisrt we will be creating error route in app.js and again creating a new image.
+
+Delete existing image in dockerhub.
+
+> docker build -t kub-volume:v1 .
+
+> docker tag kub-volume:v1 sourishjana/demoimages:v3
+
+> docker push sourishjana/demoimages:v3
+
+Update deployment.yaml file with new image name from dockerhub i.e sourishjana/demoimages:v3
+
+> kubectl apply -f deployment.yaml
+
+> kubectl get pods
+NAME                                READY   STATUS              RESTARTS      AGE
+story-deployment-54d55fbd74-95xl4   1/1     Running             1 (25m ago)   12h
+story-deployment-57494ccf5f-jvn9h   0/1     ContainerCreating   0             10s
+
+
+Now add some text to the file using POST http://127.0.0.1:61955/story
+Read the file using GET http://127.0.0.1:61955/story
+Crash the container using GET http://127.0.0.1:61955/error
+Now if we access the file content using GET http://127.0.0.1:61955/story it will be empty because when we go to the error route the container Crash happens and it wipes out the files 
+
+But we need our data even if the container restarts right?
+
+

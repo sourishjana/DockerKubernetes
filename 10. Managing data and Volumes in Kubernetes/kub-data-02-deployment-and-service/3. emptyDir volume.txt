@@ -1,0 +1,85 @@
+
+
+EMPTYDIR VOLUME:
+
+An emptyDir volume in Kubernetes is a temporary directory that is created when a Pod is assigned to a node and exists as long as the Pod is running on that node. It is initially empty and can be used for temporary storage by containers in the same Pod.
+
+Key Features:
+1. Lifecycle Tied to Pod – The emptyDir volume is deleted as soon as the Pod is removed or restarted.
+2. Shared Storage – All containers in the same Pod can access the emptyDir volume.
+3. Backed by Disk – By default, it uses the node’s local storage (RAM, SSD, or HDD). If medium: "Memory" is specified, it uses RAM instead of disk.
+
+Use Cases:
+Temporary storage for data processing.
+Sharing files between containers in a Pod.
+Caching files that do not need to persist beyond the Pod’s lifecycle.
+
+
+--------------------------------------------------------------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: story-deployment
+spec: 
+  replicas: 1
+  selector:
+    matchLabels:
+      app: story
+  template:
+    metadata:
+      labels:
+        app: story
+    spec:
+      containers:
+        - name: story
+          image: sourishjana/demoimages:v3
+          volumeMounts:
+            - mountPath: /app/story # should be some actual path where we store file, in our case we are storing in /story, in the container we are storing in /app/story, you can also refer to the docker-compose file the path will be same
+              name: empty-dir # should be same as the name of the volume
+      volumes:
+        - name: empty-dir
+          emptyDir: {}  # Creates an emptyDir volume
+--------------------------------------------------------------------------------------------------------------------------------
+
+> kubectl apply -f deployment.yaml
+
+> minikube service story-service
+
+Now add some text to the file using POST http://127.0.0.1:61955/story
+Read the file using GET http://127.0.0.1:61955/story
+Crash the container using GET http://127.0.0.1:61955/error
+Still we get the file content using GET http://127.0.0.1:61955/story
+
+> kubectl get pods
+NAME                                READY   STATUS    RESTARTS       AGE
+story-deployment-6646bff8f9-d75k9   1/1     Running   1 (119s ago)   4m37s
+
+Here you can see the container got restarted once but still our data is there.
+
+
+
+
+PROBLEM with emptyDir:
+
+In the above file if we make the replicas as 2
+
+  replicas: 2
+
+and update the deployment.yaml file then what happens:
+
+> kubectl apply -f deployment.yaml
+deployment.apps/story-deployment configured
+
+> kubectl get pods
+NAME                                READY   STATUS    RESTARTS        AGE
+story-deployment-6646bff8f9-d75k9   1/1     Running   1 (9m54s ago)   12m
+story-deployment-6646bff8f9-p8plf   1/1     Running   0               5s
+
+
+Now if I crash the server using GET http://127.0.0.1:61955/error then
+Pod1 is down with our file text stored there.
+Now if I try to access GET http://127.0.0.1:61955/story we get empty file, as all the user requests are redirected to now Pod2 right. And in Pod2 we donot have any file stored.
+As we read our emptyDir is Pod specific so we dinot get the data from Pod2. Again after some time Pod1 restarts then again you will starting to get the same data we saved earlier.
+
+So this is a problem right.
+

@@ -1,0 +1,70 @@
+A hostPath volume in Kubernetes mounts a file or directory from the host node’s filesystem into a Pod. This allows containers in the Pod to access files on the host machine (i.e node on which pod is running). Unlike emptyDir, which is ephemeral, hostPath provides access to persistent data on the node.
+
+1. Maps Host Filesystem to Pod
+    Mounts an existing file or directory from the host node into the Pod.
+
+2. Persistent but Node-Specific
+    Data persists even after the Pod is deleted.
+    However, if the Pod moves to a different node, it will not find the same files.
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: story-deployment
+spec: 
+  replicas: 2
+  selector:
+    matchLabels:
+      app: story
+  template:
+    metadata:
+      labels:
+        app: story
+    spec:
+      containers:
+        - name: story
+          image: sourishjana/demoimages:v3
+          volumeMounts:
+            - mountPath: /app/story # should be some actual path where we store file, in our case we are storing in /story, in the container we are storing in /app/story, you can also refer to the docker-compose file the path will be same
+              name: host-path # should be same as the name of the volume
+      volumes:
+        - name: host-path
+          hostPath:
+            path: /data
+            type: DirectoryOrCreate # Creates a directory if it doesn't exist.
+---------------------------------------------------------------------------------------------------------------------------------
+
+> kubectl apply -f deployment.yaml
+deployment.apps/story-deployment configured
+
+> kubectl get pods
+NAME                                READY   STATUS        RESTARTS      AGE
+story-deployment-6548674888-gs92b   1/1     Running       0             11s
+story-deployment-6548674888-wm2hd   1/1     Running       0             9s
+story-deployment-6646bff8f9-d75k9   1/1     Terminating   2 (14m ago)   27m
+story-deployment-6646bff8f9-p8plf   1/1     Terminating   0             14m
+
+
+
+Now add some text to the file using POST http://127.0.0.1:61955/story
+Read the file using GET http://127.0.0.1:61955/story
+Crash the container using GET http://127.0.0.1:61955/error
+
+Perviously We got empty file content using GET http://127.0.0.1:61955/story
+As we have 2 replicas so requests were forwarded to Pod2.
+
+But now as we have out file stored in Node so we can get the same content from any pod in that node.
+
+
+
+
+
+PROBLEM with hostPath:
+
+If the Pod moves to a different node, it will not find the same files.
+
+
+

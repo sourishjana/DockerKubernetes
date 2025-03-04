@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: story-deployment
 spec: 
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: story
@@ -14,4 +14,13 @@ spec:
     spec:
       containers:
         - name: story
-          image: sourishjana/demoimages:v2
+          image: sourishjana/demoimages:v3
+          volumeMounts:
+            - mountPath: /app/story # should be some actual path where we store file, in our case we are storing in /story, in the container we are storing in /app/story, you can also refer to the docker-compose file the path will be same
+              name: host-path # should be same as the name of the volume
+      volumes:
+        - name: host-path
+          hostPath:
+            path: /data
+            type: DirectoryOrCreate # Creates a directory if it doesn't exist.
+      
