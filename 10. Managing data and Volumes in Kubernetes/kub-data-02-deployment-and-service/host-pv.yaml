@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: host-pv
+spec:
+  capacity:
+    storage: 1Gi # 1 gb, also check how much space you cluster
+  accessModes:
+    - ReadWriteOnce   # This is mounted as a volume in a single node. Multiple pods must be in same node
+ #  - ReadOnlyMany    # This is a volume in a single node but can only be read from pods in a diff node, so pods on multiple diff nodes can also only read the data. as here we have defined a hostPath attribute this option we cannot use, as hostPath by definition means path on a single node. so pods on other nodes cannot access it.
+ #  - ReadWriteMany   # This is same as ReadOnlyMany just here other pods on multiple diff nodes has both read and write access. same as we have hostPath defined we cannot use it 
+  volumeMode: Filesystem # we have Filesystem and Block
+  #persistentVolumeReclaimPolicy: Retain  # Options: Retain, Recycle, Delete
+  storageClassName: standard # > kubectl get sc -> in order to get the default storage class available for us and we use that 
+  hostPath: # if we want to create volume on a single node and all the pods on that node only able to access the volume
+    path: /data  # Path in the cluster
+    type: DirectoryOrCreate # if the path doesnot exists then create the path

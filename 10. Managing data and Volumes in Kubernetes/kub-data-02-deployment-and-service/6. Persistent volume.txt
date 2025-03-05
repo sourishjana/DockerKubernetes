@@ -1,0 +1,151 @@
+Till now we discussed about multiple volume and all of them had certain disadvantages like if we have multiple pods or pods in multiple nodes then our data will be gone.
+For minikube VM the hostPath volume was working because minikube is based on single worker node and one master node concept so we will not have any problem as all the pods are created in a single node. 
+But when we deploy our application in a actual cloud provider then we will face problems with the volumes we have learned.
+
+To solve this problem we have Persistent volume:
+It achieves it using detached volumes which are not existing in any pod or node.
+POD AND NODE INDEPENDENT.
+
+It will be existing inside a cluster.
+
+
+A Persistent Volume (PV) in Kubernetes is a cluster-wide storage resource that provides a way to manage durable storage independently of Pods.
+
+
+Key Concepts of Persistent Volume (PV)
+1. Persistent Volume (PV): A physical storage resource in the cluster
+2. Persistent Volume Claim (PVC): A request for storage made by a Pod.
+
+How Persistent Volumes Work?
+1. Admin provisions a PV (or it's dynamically created using a StorageClass).
+2. User creates a PVC specifying the required storage size and access mode.
+3. Kubernetes binds the PVC to a suitable PV.
+4. Pod uses the PVC to access storage.
+5. When the Pod is deleted, data remains on the PV unless deleted explicitly.
+
+
+Define a PV:
+
+host-pv.yaml
+---------------------------------------------------------------------------------------------------------------------------------
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: host-pv
+spec:
+  capacity:
+    storage: 1Gi # 1 gb, also check how much space you cluster or node provides
+  accessModes:
+    - ReadWriteOnce   # This is mounted as a volume in a single node. Multiple pods must be in same node
+ #  - ReadOnlyMany    # This is a volume in a single node but can only be read from pods in a diff node, so pods on multiple diff nodes can also only read the data. as here we have defined a hostPath attribute this option we cannot use, as hostPath by definition means path on a single node. so pods on other nodes cannot access it.
+ #  - ReadWriteMany   # This is same as ReadOnlyMany just here other pods on multiple diff nodes has both read and write access. same as we have hostPath defined we cannot use it 
+  volumeMode: Filesystem # we have Filesystem and Block
+# persistentVolumeReclaimPolicy: Retain  # Options: Retain, Recycle, Delete
+  storageClassName: standard # > kubectl get sc -> in order to get the default storage class available for us and we use that 
+  hostPath: # if we want to create volume on a single node and all the pods on that node only able to access the volume
+    path: /data  # Local storage path (for testing)
+    type: DirectoryOrCreate # if the path doesnot exists then create the path
+---------------------------------------------------------------------------------------------------------------------------------
+
+Define a PVC:
+
+host-pvc.yaml
+---------------------------------------------------------------------------------------------------------------------------------
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: host-pvc
+spec:
+  volumeName: host-pv # PV name you have created
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard # > kubectl get sc -> in order to get the default storage class available for us and we use that 
+  resources:
+    requests:
+      storage: 1Gi  # Must be ≤ PV's storage 
+---------------------------------------------------------------------------------------------------------------------------------
+
+Update deployment:
+
+deployment.yaml
+---------------------------------------------------------------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: story-deployment
+spec: 
+  replicas: 2
+  selector:
+    matchLabels:
+      app: story
+  template:
+    metadata:
+      labels:
+        app: story
+    spec:
+      containers:
+        - name: story
+          image: sourishjana/demoimages:v3
+          volumeMounts:
+            - mountPath: /app/story # should be some actual path where we store file, in our case we are storing in /story, in the container we are storing in /app/story, you can also refer to the docker-compose file the path will be same
+              name: host-path # should be same as the name of the volume
+      volumes:
+        - name: host-path
+          persistentVolumeClaim:
+            claimName: host-pvc # PVC name
+---------------------------------------------------------------------------------------------------------------------------------
+
+
+> kubectl apply -f host-pv.yaml
+persistentvolume/host-pv created
+
+> kubectl apply -f host-pvc.yaml
+persistentvolumeclaim/host-pvc created
+
+> kubectl apply -f deployment.yaml                                                                                                                           
+deployment.apps/story-deployment configured
+
+> kubectl get pv
+NAME      CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM              STORAGECLASS   VOLUMEATTRIBUTESCLASS   REASON   AGE
+host-pv   1Gi        RWO            Retain           Bound    default/host-pvc   standard       <unset>                          63s
+
+> kubectl get pvc
+NAME       STATUS   VOLUME    CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+host-pvc   Bound    host-pv   1Gi        RWO            standard       <unset>                 62s
+
+> minikube service story-service
+|-----------|---------------|-------------|---------------------------|
+| NAMESPACE |     NAME      | TARGET PORT |            URL            |
+|-----------|---------------|-------------|---------------------------|
+| default   | story-service |          80 | http://192.168.49.2:31310 |
+|-----------|---------------|-------------|---------------------------|
+🏃  Starting tunnel for service story-service.
+|-----------|---------------|-------------|------------------------|
+| NAMESPACE |     NAME      | TARGET PORT |          URL           |
+|-----------|---------------|-------------|------------------------|
+| default   | story-service |             | http://127.0.0.1:51554 |
+|-----------|---------------|-------------|------------------------|
+🎉  Opening service default/story-service in default browser...
+❗  Because you are using a Docker driver on windows, the terminal needs to be open to run it.
+
+
+
+
+Read the file using GET http://127.0.0.1:61955/story
+You will get the same file which we read in hostPath volume, this is because if you see the deployment.yaml file there you will see in the mountPath we see the same path.
+          volumeMounts:
+            - mountPath: /app/story 
+              name: host-path # should be same as the name of the volume
+      volumes:
+        - name: host-path
+          persistentVolumeClaim:
+            claimName: host-pvc # PVC name
+
+
+Crash the container using GET http://127.0.0.1:61955/error
+We get the same file content using GET http://127.0.0.1:61955/story
+
+
+Now we have achieved NODE and POD independence.
+
+

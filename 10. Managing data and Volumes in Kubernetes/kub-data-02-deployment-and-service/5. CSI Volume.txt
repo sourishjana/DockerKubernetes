@@ -1,0 +1,10 @@
+The CSI (Container Storage Interface) volume type in Kubernetes is used to integrate external storage systems dynamically with Kubernetes workloads. CSI allows Kubernetes to use third-party storage drivers
+
+Some popular CSI drivers include:
+
+AWS EBS CSI Driver (ebs.csi.aws.com)
+Azure Disk CSI Driver (disk.csi.azure.com)
+Google Cloud Persistent Disk CSI Driver (pd.csi.storage.gke.io)
+Ceph CSI Driver (cephfs.csi.ceph.com)
+OpenEBS CSI Driver (openebs-csi)
+

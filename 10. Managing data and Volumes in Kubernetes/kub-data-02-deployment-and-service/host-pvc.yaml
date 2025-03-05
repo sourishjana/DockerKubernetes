@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: host-pvc
+spec:
+  volumeName: host-pv # PV name you have created
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard # > kubectl get sc -> in order to get the default storage class available for us and we use that 
+  resources:
+    requests:
+      storage: 1Gi  # Must be ≤ PV's storage 

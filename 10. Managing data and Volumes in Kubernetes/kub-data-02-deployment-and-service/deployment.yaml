@@ -20,7 +20,6 @@ spec:
               name: host-path # should be same as the name of the volume
       volumes:
         - name: host-path
-          hostPath:
-            path: /data
-            type: DirectoryOrCreate # Creates a directory if it doesn't exist.
+          persistentVolumeClaim:
+            claimName: host-pvc # PVC name
       
