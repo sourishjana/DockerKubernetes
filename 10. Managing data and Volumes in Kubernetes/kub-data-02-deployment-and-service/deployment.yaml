@@ -14,7 +14,20 @@ spec:
     spec:
       containers:
         - name: story
-          image: sourishjana/demoimages:v3
+          image: sourishjana/demoimages:v5
+          env:
+            # Define the environment variable
+            - name: FOLDER_PATH # name of the env veraible in the actual app.js file
+              valueFrom:
+                configMapKeyRef:
+                  name: story-config-maps   # The ConfigMap name
+                  key: folder # key name in the ConfigMap.
+            - name: PORT # name of the env veraible in the actual app.js file
+              valueFrom:
+                configMapKeyRef:
+                  name: story-config-maps   # The ConfigMap name
+                  key: port # key name in the ConfigMap.
+
           volumeMounts:
             - mountPath: /app/story # should be some actual path where we store file, in our case we are storing in /story, in the container we are storing in /app/story, you can also refer to the docker-compose file the path will be same
               name: host-path # should be same as the name of the volume

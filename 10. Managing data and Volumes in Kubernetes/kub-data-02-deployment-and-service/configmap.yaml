@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: story-config-maps
+data:
+  # property-like keys; each key maps to a simple value
+  folder: "story"
+  port: "3000"

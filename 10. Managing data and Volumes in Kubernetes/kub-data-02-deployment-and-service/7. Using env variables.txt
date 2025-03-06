@@ -1,0 +1,96 @@
+In the app.js file we now hcnaged the hard code folder path to a env variable:
+const filePath = path.join(__dirname, 'story', 'text.txt');
+app.listen(3000);
+
+to
+
+const filePath = path.join(__dirname, process.env.FOLDER_PATH, 'text.txt');
+app.listen(process.env.PORT);
+
+Now build image and push it to dockerhub.
+
+
+> docker build -t kub-volume:v5 .
+
+> docker tag kub-volume:v4 sourishjana/demoimages:v5
+
+> docker push sourishjana/demoimages:v5
+
+
+Create a new resource for kubernetes:
+
+configmap.yaml
+---------------------------------------------------------------------------------------------------------------------------------
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: story-config-maps
+data:
+  # property-like keys; each key maps to a simple value
+  folder: "story"
+  port: "3000"
+---------------------------------------------------------------------------------------------------------------------------------
+
+Update deployment.yaml file with new image name
+
+deployment.yaml
+---------------------------------------------------------------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: story-deployment
+spec: 
+  replicas: 2
+  selector:
+    matchLabels:
+      app: story
+  template:
+    metadata:
+      labels:
+        app: story
+    spec:
+      containers:
+        - name: story
+          image: sourishjana/demoimages:v5
+          env:
+            # Define the environment variable
+            - name: FOLDER_PATH # name of the env veraible in the actual app.js file
+              valueFrom:
+                configMapKeyRef:
+                  name: story-config-maps   # The ConfigMap name
+                  key: folder # key name in the ConfigMap.
+            - name: PORT # name of the env veraible in the actual app.js file
+              valueFrom:
+                configMapKeyRef:
+                  name: story-config-maps   # The ConfigMap name
+                  key: port # key name in the ConfigMap.
+
+          volumeMounts:
+            - mountPath: /app/story # should be some actual path where we store file, in our case we are storing in /story, in the container we are storing in /app/story, you can also refer to the docker-compose file the path will be same
+              name: host-path # should be same as the name of the volume
+      volumes:
+        - name: host-path
+          persistentVolumeClaim:
+            claimName: host-pvc # PVC name
+---------------------------------------------------------------------------------------------------------------------------------
+
+
+> kubectl apply -f configmap.yaml
+configmap/story-config-maps created
+
+> kubectl get configmaps
+NAME                DATA   AGE
+kube-root-ca.crt    1      3d12h
+story-config-maps   2      8s
+
+> kubectl apply -f deployment.yaml
+deployment.apps/story-deployment configured
+
+> kubectl get pods
+NAME                                READY   STATUS    RESTARTS      AGE
+story-deployment-7fc6bffd7c-j7tkl   1/1     Running   1 (14s ago)   2m48s
+story-deployment-7fc6bffd7c-k7tsd   1/1     Running   0             2m39s
+
+
+
+Now also it should work the same and now you will get you file content also as it is.
