@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-deployment
+spec: 
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user
+  template:
+    metadata:
+      labels:
+        app: user
+    spec:
+      containers:
+        - name: user
+          image: sourishjana/demoimages:user1
+          env:
+            - name: AUTH_SERVICE
+              valueFrom:
+                configMapKeyRef:
+                  name: config-map-mc 
+                  key: userRoute 
+            - name: PORT 
+              valueFrom:
+                configMapKeyRef:
+                  name: config-map-mc
+                  key: userPort 

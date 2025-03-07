@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-map-mc
+data:
+  userRoute: "auth-service.default"
+  userPort: "8080"
+  authPort: "80"
+  taskPort: "8000"
+  folder: "tasks"

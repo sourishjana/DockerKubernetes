@@ -1,0 +1,146 @@
+First deleteing all the existing deployments pods and config maps. We can keep the volume as it is
+
+> kubectl get deployments
+NAME               READY   UP-TO-DATE   AVAILABLE   AGE 
+story-deployment   2/2     2            2           3d1h
+
+> kubectl delete deployment story-deployment
+deployment.apps "story-deployment" deleted
+
+> kubectl get configmaps
+NAME                DATA   AGE
+kube-root-ca.crt    1      4d15h
+story-config-maps   2      26h
+
+> kubectl delete configmap story-config-maps
+configmap "story-config-maps" deleted
+
+
+Create an dpush images to dockerhub:------------------------------------------------
+
+First delete all the existing images in dockerhub.
+
+> docker build -t users-image:user1 .
+
+> docker tag users-image:user1 sourishjana/demoimages:user1
+
+> docker push sourishjana/demoimages:user1
+
+> docker build -t auth-image:auth1 .
+
+> docker tag auth-image:auth1 sourishjana/demoimages:auth1
+
+> docker push sourishjana/demoimages:auth1
+
+
+Creating all the deployment, service, configmaps for k8 deployment:---------------------------------------------------
+
+
+Now its simple for Pod to Pod communication:
+By default kubernetes uses a DNS which can resolve all the domain names and resolve the IP address:
+
+Here we have 
+user-deployment -> which will create a pos for user container
+user-service -> it will create a LoadBalancer service because it should be accssed from outside world.
+
+auth-deployment -> creates a pod for auth container.
+auth-service -> This is a ClusterIP service as it will not be exposed but will be used for internal pod communication.
+
+configmap -> stores all the env variables.
+
+If you see the users-app.js file here we communicate with the auth service by api:
+`http://${process.env.AUTH_SERVICE}/hashed-password/`
+
+We have known in docker that we can just put all the container in the same network and just put name of the container to which the api call goes and it will replace it with its IP automatically.
+
+similar thing happens for kubernetes we have to specify like this:
+
+service_name.namespace_name
+
+here it will be like `http://auth-service.default/hashed-password/`
+
+Now we can put "auth-service.default" into a env variable in configmap.
+
+
+by default when we create any deployment or service it will go under the default namespace
+
+> kubectl get namespaces
+NAME                   STATUS   AGE
+default                Active   4d15h
+kube-node-lease        Active   4d15h
+kube-public            Active   4d15h
+kube-system            Active   4d15h
+kubernetes-dashboard   Active   4d15h
+
+see here we havent created any namespace then also we have a default namespace.
+
+> kubectl get services
+NAME            TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
+auth-service    ClusterIP      10.101.2.191   <none>        80/TCP         17m
+kubernetes      ClusterIP      10.96.0.1      <none>        443/TCP        4d15h
+story-service   LoadBalancer   10.109.4.228   <pending>     80:31310/TCP   3d2h
+user-service    LoadBalancer   10.96.35.6     <pending>     80:32494/TCP   17m
+
+There is another way we can specify the IP. If you see the above cmd result we have got the Cluster-IP column
+from here you can get the IP "10.101.2.191" and the use it like:
+
+`http://10.101.2.191/hashed-password/`
+
+But this is not a good approach.
+
+
+
+
+HOW TO CRAETE 2 CONTAINERS IN THE SAME POD and communication between them:
+
+If we create it then we will not be needing a seperate service for the container which we do not want to get exposed. and 
+localhost IP address will do the job in that case.
+e.g
+`http://localhost/hashed-password/`
+
+
+But its ot recommended to put 2 containers in a same POD untill and unless thay are very much tightly coupled.
+
+Best way is to put 1 container in 1 POD.
+
+
+
+
+
+
+
+Creating another Pod:
+
+> docker build -t task-image:task1 .
+
+> docker tag task-image:task1 sourishjana/demoimages:task1
+
+> docker push sourishjana/demoimages:task1
+
+Created deployment and service yaml files. Also updated configmap yaml file
+
+> kubectl apply -f configmap.yaml
+configmap/config-map-mc configured
+
+> kubectl apply -f task-deployment.yaml
+deployment.apps/task-deployment created
+
+> kubectl apply -f task-service.yaml
+service/task-service created
+
+> minikube service task-service
+|-----------|--------------|-------------|---------------------------|
+| NAMESPACE |     NAME     | TARGET PORT |            URL            |
+|-----------|--------------|-------------|---------------------------|
+| default   | task-service |          80 | http://192.168.49.2:30652 |
+|-----------|--------------|-------------|---------------------------|
+🏃  Starting tunnel for service task-service.
+|-----------|--------------|-------------|------------------------|
+| NAMESPACE |     NAME     | TARGET PORT |          URL           |
+|-----------|--------------|-------------|------------------------|
+| default   | task-service |             | http://127.0.0.1:52786 |
+|-----------|--------------|-------------|------------------------|
+🎉  Opening service default/task-service in default browser...
+❗  Because you are using a Docker driver on windows, the terminal needs to be open to run it.
+
+
