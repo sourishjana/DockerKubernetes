@@ -1,0 +1,33 @@
+✅ Step 1: Check the Ingress Controller Logs
+Since you are using NGINX Ingress, first check the logs of the Ingress Controller:
+
+
+
+> kubectl logs -l app.kubernetes.io/name=ingress-nginx -n ingress-nginx
+
+127.0.0.1 - - [08/Mar/2025:10:12:32 +0000] "POST /api/tasks HTTP/1.1" 404 140 "-" "PostmanRuntime/7.43.0" 367 0.096 [kubapp-task-service-80] [] 10.244.1.36:8000 140 0.097 404 76dda7793970ca231c8af12427beaf3f
+127.0.0.1 - - [08/Mar/2025:10:12:41 +0000] "POST /login HTTP/1.1" 200 15 "-" "PostmanRuntime/7.43.0" 347 0.455 [kubapp-user-service-80] [] 10.244.1.37:8080 15 0.455 200 da1a58c71149951d500fc77a4a07b6d5
+127.0.0.1 - - [08/Mar/2025:10:13:25 +0000] "POST /api/tasks HTTP/1.1" 404 140 "-" "PostmanRuntime/7.43.0" 367 0.006 [kubapp-task-service-80] [] 10.244.1.36:8000 140 0.006 404 ec1acbe54f498c6cb2879ea2a66d9270
+
+From this log we can usderstand that the requests are mapped to correct service or not.
+ POST /api/tasks HTTP/1.1" 404 error means it is not mapped correctly so it menas the problem is with ingress.
+
+If they are send properly to perticular service then you have to check logs of the pod. In this way we can debug our application if something goes wrong.
+
+
+
+✅ Step 2: Check the Logs of Your API Service
+2️⃣ Check logs of the API pod:
+
+> kubectl get pods -n kubapp
+
+> kubectl logs pod_name -n kubapp
+
+
+✅ Step 4: Describe the Ingress Resource
+Check if the Ingress is correctly forwarding requests:
+
+> kubectl describe ingress ingress-service -n kubapp
+
+👉 If there are backend errors or misconfigured rules, they will appear in the Events section.
+

@@ -1,0 +1,39 @@
+Now we have added frontend to access the tasks services.
+
+Now its in react and we need some server to serve the react app for that we have used nginx server.
+There is s nginx.conf which is a config file.
+
+where there is a part
+
+  # http://service_name.namespace_name:port_on_which_service_exposed/
+  location /api/ {
+    proxy_pass http://task-service.kubapp:80/;
+  }
+
+This is a reverse proxy.
+
+Discussed in next text.
+
+Now still it fails, Why? 
+
+in the network tab it ways 500 internal server error. 
+GET http://localhost:8888/api/tasks -> 500 error
+
+now see logs > kubectl logs -l app.kubernetes.io/name=ingress-nginx -n ingress-nginx
+
+this is because of CORS in task-service. we have to allow cross origin requests.
+
+we have to add a code in tasks-api/tasks-app.js
+
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST,GET,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  next();
+})
+
+again build docker images and push to dockerhub and again update the deployment. It will start working
+
+
+
+

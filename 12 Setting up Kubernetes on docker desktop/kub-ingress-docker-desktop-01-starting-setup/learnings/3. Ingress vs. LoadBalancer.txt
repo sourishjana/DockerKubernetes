@@ -1,0 +1,51 @@
+Ingress vs. LoadBalancer: Which One is Better?
+Both Ingress and LoadBalancer services can expose applications outside the Kubernetes cluster, but each has its use case.
+
+
+1️⃣ When to Use Ingress? (Recommended for Most Cases)
+✅ Best for: Managing Multiple Services Efficiently
+Ideal when you have multiple services and want to expose them via a single LoadBalancer.
+Provides path-based (/api, /user) and domain-based (app.example.com) routing.
+Supports TLS (HTTPS) termination, security, and rewrites.
+
+
+🔥 Why Use Ingress Instead of LoadBalancer?
+Feature	            Ingress (Recommended)	                                LoadBalancer
+Cost	            ✅ Uses 1 LoadBalancer for all services	            ❌ Each service needs a LoadBalancer ($$$)
+Path-Based Routing	✅ /api → API Service /user → User Service	        ❌ No built-in routing
+TLS/SSL (HTTPS)	    ✅ Built-in TLS termination	                        ❌ Must configure manually
+External Traffic	✅ Exposes multiple services via one IP	            ❌ Each service gets its own IP
+Advanced Features	✅ Load balancing, rate limiting, authentication	    ❌ Basic external access only
+
+
+🚀 Example Use Case: Multiple Microservices
+Imagine you have:
+
+A user service (/users)
+A task service (/tasks)
+With Ingress, you can route traffic to different services using paths:
+
+rules:
+  - host: myapp.com
+    http:
+      paths:
+        - path: /users
+          backend:
+            service:
+              name: user-service
+              port:
+                number: 80
+        - path: /tasks
+          backend:
+            service:
+              name: task-service
+              port:
+                number: 80
+
+🔥 Now, all traffic is handled with ONE LoadBalancer instead of multiple!
+
+
+🚨 Problems with LoadBalancer
+If you have 5 microservices, you’ll need 5 different LoadBalancers (expensive 💸).
+No built-in path-based routing like Ingress.
+No built-in HTTPS termination, requiring manual setup.

@@ -1,0 +1,80 @@
+First we have created namespace.yaml file to add namespace to logically group our resouces.
+
+In order to add namespace in every file we have to add a property in metadata inside all yaml files:
+  namespace: kubapp
+
+
+
+We have also created a ingress.yaml file to include a ingress resource. 
+Ingress is a resource that manages external access to services within a cluster, typically HTTP and HTTPS traffic
+
+In order to modify the ingress.yaml file and configure some more 
+goto: https://kubernetes.io/docs/concepts/services-networking/ingress/
+
+
+
+
+
+Now as we are using name spaces cmds will be like:----------------------------------------------------------------------------
+
+> kubectl get pods -n kubapp
+
+> kubectl get services -n kubapp -o wide
+
+> kubectl describe services user-service -n kubapp
+
+> kubectl logs pod_name -n kubapp
+
+> kubectl get ingress -n kubapp
+NAME              CLASS   HOSTS   ADDRESS      PORTS   AGE
+ingress-service   nginx   *       172.20.0.4   80      22m
+
+
+
+
+
+In order to create all the resouces at once we can use the below command:----------------------------------------------------
+
+
+kubernetes> kubectl apply -f namespace.yaml
+namespace/kubapp created
+
+> kubectl apply -f kubernetes
+deployment.apps/auth-deployment created
+service/auth-service created
+configmap/config-map-mc created
+ingress.networking.k8s.io/ingress-service created
+namespace/kubapp unchanged
+deployment.apps/task-deployment created
+service/task-service created
+deployment.apps/user-deployment created
+service/user-service created
+
+
+To Delete all the resources all together:-------------------------------------------------------------------------------------
+
+> kubectl delete namespace kubapp
+namespace "kubapp" deleted
+
+
+
+
+In order to forward all the requests to the nginx service we use forward port:------------------------------------------------
+In order to expose the nginx port.
+Here the ingress is exposed at port 80 and we want to access it from 
+http://localhost:8888/login
+
+
+> kubectl port-forward -n ingress-nginx svc/ingress-nginx-controller 8888:80
+Forwarding from 127.0.0.1:8888 -> 80
+Forwarding from [::1]:8888 -> 80
+Handling connection for 8888
+Handling connection for 8888
+
+Keep the terminal open.
+
+
+
+You can also check a port is currently being used or not:--------------------
+
+> netstat -ano | findstr :8888

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+  namespace: kubapp
+spec:
+  selector: 
+    app: user
+  type: ClusterIP
+  ports:
+    - protocol: "TCP"
+      port: 80
+      targetPort: 8080

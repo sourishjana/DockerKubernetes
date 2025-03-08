@@ -1,0 +1,129 @@
+What is a Reverse Proxy?
+A reverse proxy is a server that sits between clients (browsers, Postman, etc.) and backend servers (APIs, databases, etc.). It forwards client requests to the appropriate backend service and returns responses to the client.
+
+
+How Your Configuration Works as a Reverse Proxy
+
+location /api/ {
+    proxy_pass http://task-service.kubapp:80/;
+}
+
+When a client (browser, Postman, Angular app, React app etc.) sends a request to Nginx at /api/,
+Nginx forwards the request to task-service.kubapp:80 inside the Kubernetes cluster,
+The backend (task-service) processes the request and sends a response,
+Nginx then sends that response back to the original client.
+
+🔹 Why is it Called a "Reverse" Proxy?
+A regular (forward) proxy is used by clients to hide their identity and access external servers (e.g., a VPN).
+A reverse proxy hides backend services and acts as a single entry point for clients.
+
+📌 Example Difference:
+
+Type	        Who Uses It?	                Purpose
+Forward Proxy	Clients (Users)	                Hides client identity & forwards requests to the internet
+Reverse Proxy	Servers (APIs, Microservices)	Hides backend services & forwards requests from users to internal services
+
+
+
+🚀 Why Use a Reverse Proxy in Kubernetes?
+🔹 Security – Hides internal services (e.g., task-service.kubapp:80) from direct public access.
+🔹 Load Balancing – Distributes traffic among multiple backend pods.
+🔹 SSL Termination – Handles HTTPS requests before forwarding to the backend.
+🔹 Caching & Compression – Improves performance by caching static responses.
+🔹 Centralized API Gateway – Provides a single entry point for different backend services.
+
+
+
+🔍 Example Flow (How Requests Move)
+
+1️⃣ Client (Browser/Postman) Requests:
+
+GET http://localhost:8888/api/tasks
+
+2️⃣ Nginx Receives & Forwards Request:
+
+proxy_pass http://task-service.kubapp:80/;
+
+3️⃣ Backend (task-service) Processes Request & Responds:
+
+{ "task": "Complete Kubernetes setup" }
+
+
+4️⃣ Nginx Returns Response to the Client:
+
+{ "task": "Complete Kubernetes setup" }
+
+
+
+
+
+There is a thing to notice. we are using ingress again as reverse proxy. So we are doing reverse proxy two times here.
+
+How?
+
+
+1. In the nginx.conf file:
+
+proxy_pass http://task-service.kubapp:80/;
+
+2. Client (Browser/Postman) Makes a Request. this proxys request to task-service. So it goes to ingress next, so in the UI network tab we see url like:
+localhost:8888 is forwarded to Ingress
+
+GET http://localhost:8888/api/tasks
+
+3. now ingress proxys the request to task-service :
+
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: task-service
+                port:
+                  number: 80
+
+4. task-service handles the request and returns the response:
+It responds with JSON
+
+5. Ingress Forwards the Response Back to the Client:
+
+6. Your browser/Postman receives
+
+
+
+
+
+Ingress as reverse proxy:
+
+Yes, this Ingress resource is acting as a reverse proxy, just like Nginx would in a standalone configuration.
+
+🔄 Why is This a Reverse Proxy?
+An Ingress controller (like Nginx Ingress) is responsible for handling external requests and routing them to the appropriate Kubernetes services. It functions similarly to a traditional Nginx reverse proxy but within Kubernetes.
+
+
+🛠 How This Works
+1️⃣ A client (browser, Postman, etc.) makes a request to Ingress:
+
+
+GET http://your-ingress-ip/
+or
+
+GET http://your-ingress-ip/api/tasks
+
+2️⃣ Ingress Controller (e.g., Nginx Ingress) routes the request:
+
+/ → frontend-service (port 8090)
+/api → task-service (port 80)
+
+3️⃣ Ingress forwards the request to the appropriate service inside the cluster.
+
+This is similar to proxy_pass in Nginx.
+
+
+📌 Since Ingress acts as a single entry point and directs requests to different backend services, it serves the same role as an Nginx reverse proxy.
+
+
+Access Services via Ingress:
+http://<INGRESS-IP>/ → Should return your frontend app.
+http://<INGRESS-IP>/api/tasks → Should hit task-service and return API data.
+
+

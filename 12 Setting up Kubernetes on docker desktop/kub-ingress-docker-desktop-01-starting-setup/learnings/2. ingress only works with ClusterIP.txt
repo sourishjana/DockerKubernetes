@@ -1,0 +1,38 @@
+Now if we want to use ingress we have to convert all the LoadBalancer services to ClusterIP.
+
+Ingress is designed to work only with ClusterIP services because it acts as a reverse proxy that routes external traffic inside the cluster.
+
+Ingress Controller Itself is a Load Balancer
+Ingress sits in front of your services and acts as a single entry point for external traffic.
+The Ingress Controller (like Nginx) is typically exposed as a LoadBalancer service to accept external requests.
+Once traffic reaches the Ingress Controller, it forwards requests to ClusterIP services inside the cluster.
+
+
+> kubectl get svc -n ingress-nginx
+NAME                                 TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
+ingress-nginx-controller             LoadBalancer   10.96.36.207    172.20.0.4    80:31604/TCP,443:30157/TCP   176m
+ingress-nginx-controller-admission   ClusterIP      10.96.102.118   <none>        443/TCP                      176m
+
+
+Here, ingress-nginx-controller is a LoadBalancer, meaning it already exposes the cluster externally.
+
+
+
+LoadBalancer is Meant for External Access, Not Internal Routing
+
+When you expose a service as LoadBalancer, it bypasses Ingress because it's already reachable from outside.
+🚨 Problem: If an Ingress tries to route to a LoadBalancer service, it may not work because the LoadBalancer might not route requests properly inside the cluster.
+
+Ingress Works by Routing Traffic Inside the Cluster
+The Ingress Controller only knows how to forward traffic to ClusterIP services.
+ClusterIP services are meant for internal communication, which is exactly what Ingress does.
+
+✅ Correct Setup for Ingress
+Ingress Controller (LoadBalancer or NodePort) → Handles external traffic
+Backend services (ClusterIP) → Only accessible inside the cluster via Ingress
+
+🌟 Summary
+❌ Ingress → LoadBalancer ❌ (Not recommended)
+✅ Ingress → ClusterIP ✅ (Correct setup)
+✅ Ingress Controller → LoadBalancer ✅ (Exposes Ingress to the internet)
+

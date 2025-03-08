@@ -1,0 +1,42 @@
+
+
+> kubectl get svc -n ingress-nginx
+NAME                                 TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
+ingress-nginx-controller             LoadBalancer   10.96.36.207    172.20.0.4    80:31604/TCP,443:30157/TCP   176m
+ingress-nginx-controller-admission   ClusterIP      10.96.102.118   <none>        443/TCP                      176m
+
+
+> kubectl get pods -n ingress-nginx
+NAME                                       READY   STATUS      RESTARTS       AGE
+ingress-nginx-admission-create-p4mtv       0/1     Completed   0              3h29m
+ingress-nginx-admission-patch-tqkcs        0/1     Completed   1              3h29m
+ingress-nginx-controller-974f4cbd8-49565   1/1     Running     4 (105m ago)   3h29m
+
+
+> kubectl describe svc ingress-nginx-controller -n ingress-nginx
+Name:                     ingress-nginx-controller
+Namespace:                ingress-nginx
+Labels:                   app.kubernetes.io/component=controller
+                          app.kubernetes.io/instance=ingress-nginx
+                          app.kubernetes.io/name=ingress-nginx
+                          app.kubernetes.io/part-of=ingress-nginx
+                          app.kubernetes.io/version=1.12.0
+Annotations:              <none>
+Selector:                 app.kubernetes.io/component=controller,app.kubernetes.io/instance=ingress-nginx,app.kubernetes.io/name=ingress-nginx
+Type:                     LoadBalancer
+IP Family Policy:         SingleStack
+IP Families:              IPv4
+IP:                       10.96.36.207
+IPs:                      10.96.36.207
+LoadBalancer Ingress:     172.20.0.4 (Proxy)
+Port:                     http  80/TCP
+TargetPort:               http/TCP
+NodePort:                 http  31604/TCP
+Endpoints:                10.244.1.6:80
+Port:                     https  443/TCP
+TargetPort:               https/TCP
+NodePort:                 https  30157/TCP
+Session Affinity:         None
+External Traffic Policy:  Local
+HealthCheck NodePort:     31731
+Events:                   <none>
