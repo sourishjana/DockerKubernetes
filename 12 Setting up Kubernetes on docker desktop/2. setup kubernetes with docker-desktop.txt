@@ -1,0 +1,130 @@
+
+
+To setup Kubernetes on docker desktop:-------------------------------------------------------------------------------------------------
+
+goto: https://docs.docker.com/desktop/features/kubernetes/
+
+During setup we created a cluster with 2 nodes.
+
+
+PS F:\Docker\11. Kubernetes Networking\kub-network-01-starting-setup> kubectl config get-contexts
+*         minikube   minikube   minikube   default
+
+PS F:\Docker\11. Kubernetes Networking\kub-network-01-starting-setup> kubectl config get-contexts
+CURRENT   NAME             CLUSTER          AUTHINFO         NAMESPACE
+*         docker-desktop   docker-desktop   docker-desktop
+          minikube         minikube         minikube         default
+
+PS F:\Docker\11. Kubernetes Networking\kub-network-01-starting-setup> kubectl get nodes
+NAME                    STATUS   ROLES           AGE    VERSION
+desktop-control-plane   Ready    control-plane   109s   v1.31.1
+desktop-worker          Ready    <none>          87s    v1.31.1
+
+
+
+Installing helm:-----------------------------------------------------------------------------------------------------------------------
+
+goto: https://helm.sh/docs/intro/install/
+
+There are a lot of was to install helm, here we are using chocolaty to install helm
+
+Open cmd prompt in admin mode.
+
+C:\Windows\system32>choco install kubernetes-helm
+
+verify:
+
+PS F:\Docker\12 Setting up Kubernetes on docker desktop> helm
+The Kubernetes package manager
+
+Common actions for Helm:
+
+- helm search:    search for charts
+- helm pull:      download a chart to your local directory to view
+- helm install:   upload the chart to Kubernetes
+- helm list:      list releases of charts
+
+
+
+Setting up kubernetes dashboard:-------------------------------------------------------------------------------------------------------
+
+Now as of now we have setup kubernetes with docker-desktop but we need to have a dashboard for user frinedly view of all our kubernetes resources.
+
+goto: https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/
+
+Here in the link it says we first need to install helm and then run some helm commands to set up the dashboard.
+
+# Add kubernetes-dashboard repository
+> helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+
+# Deploy a Helm Release named "kubernetes-dashboard" using the kubernetes-dashboard chart
+> helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard
+
+> kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
+error: unable to forward port because pod is not running. Current status=Pending
+
+we will get this error because all the pods are still not up for the new namespace kubernetes-dashboard
+
+if you get namespaces you will see a new namespace created:
+
+> kubectl get namespaces
+NAME                   STATUS   AGE
+default                Active   42m
+kube-node-lease        Active   42m
+kube-public            Active   42m
+kube-system            Active   42m
+kubernetes-dashboard   Active   23m
+local-path-storage     Active   42m
+
+> kubectl get pods
+No resources found in default namespace.
+
+This cmd by default uses default namespace
+
+> kubectl get pods -n kubernetes-dashboard
+NAME                                                    READY   STATUS              RESTARTS   AGE
+kubernetes-dashboard-api-79f59d4f5d-nkkmb               1/1     Running             0          111s
+kubernetes-dashboard-auth-66b6d5f445-pvwnm              0/1     ContainerCreating   0          111s
+kubernetes-dashboard-kong-678c76c548-ckfbs              1/1     Running             0          111s
+kubernetes-dashboard-metrics-scraper-7d9658df44-nfjjc   0/1     ContainerCreating   0          111s
+kubernetes-dashboard-web-66b75c6c7f-nw7ms               0/1     ContainerCreating   0          111s
+
+> kubectl get pods -n kubernetes-dashboard
+NAME                                                    READY   STATUS    RESTARTS   AGE
+kubernetes-dashboard-api-79f59d4f5d-nkkmb               1/1     Running   0          4m4s
+kubernetes-dashboard-auth-66b6d5f445-pvwnm              1/1     Running   0          4m4s
+kubernetes-dashboard-kong-678c76c548-ckfbs              1/1     Running   0          4m4s
+kubernetes-dashboard-metrics-scraper-7d9658df44-nfjjc   1/1     Running   0          4m4s
+kubernetes-dashboard-web-66b75c6c7f-nw7ms               1/1     Running   0          4m4s
+
+
+> kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
+Forwarding from 127.0.0.1:8443 -> 8443
+Forwarding from [::1]:8443 -> 8443
+Handling connection for 8443
+Handling connection for 8443
+Handling connection for 8443
+...
+
+
+Now the dashboard is up and running on the given port.
+
+https://localhost:8443/#/namespace?namespace=default
+
+You have to keep the cmd prompt open so that dashboard is up and running. if you cluse the terminal it will end.
+
+
+
+Now when we open the above url for kubernetes dashboard it will ask for a bearer token.
+
+
+Creating a bearer token for kubernetes dashboard:--------------------------------------------------------------------------------------
+
+goto: https://kubernetes.io/docs/reference/access-authn-authz/authentication/
+
+
+PS F:\Docker\12 Setting up Kubernetes on docker desktop> kubectl create serviceaccount sourish
+serviceaccount/sourish created
+
+PS F:\Docker\12 Setting up Kubernetes on docker desktop> kubectl create token sourish
+eyJhbGciOiJSUzI1NiIsImtpZCI6Ii1QTUF1Q0RqbjdrT0NYVGtOZ0RLbmYweVVObFpreThkSzA2Wm9IMXpudDQifQ.eyJhdWQiOlsiaHR0cHM6Ly9rdWJlcm5ldGVzLmRlZmF1bHQuc3ZjLmNsdXN0ZXIubG9jYWwiXSwiZXhwIjoxNzQxNDEyNjI0LCJpYXQiOjE3NDE0MDkwMjQsImlzcyI6Imh0dHBzOi8va3ViZXJuZXRlcy5kZWZhdWx0LnN2Yy5jbHVzdGVyLmxvY2FsIiwianRpIjoiM2I5YjU0OGEtMmY5NS00ZmNiLTk1MTItNzg0M2YwYWE4ZjdmIiwia3ViZXJuZXRlcy5pbyI6eyJuYW1lc3BhY2UiOiJkZWZhdWx0Iiwic2VydmljZWFjY291bnQiOnsibmFtZSI6InNvdXJpc2giLCJ1aWQiOiIyMTc3NmE0Yy03ZDk1LTRlZjQtODYxZS1mM2FiODVmNThjOWQifX0sIm5iZiI6MTc0MTQwOTAyNCwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmRlZmF1bHQ6c291cmlzaCJ9.W6gUSYSRjCtKT0D1gAEMdGfSjBdKxeXBmRtlBTGDxLzGCudBnd8FHxM7ZidbkfemXhUcoHpmaOHfzs3HiZol2MAveuVAwvs4Od-r9V2ZlrBkzXo2K1DqrwOFRFniFP04XUrKo_g4K6-24BttLCJuaOnX-3ndRhPsAGn38ehoKO8scK5MDzEGE3qjr2Uh7FvvfyykV69efhGedgU3qm3MnBtrQzLV_yUMte2GFxMrSh-q1ErhwtptI7BPDE0lx_dnIfEIgRXWbqtw_QaRwiGr1IrjU_hcl-qLqJhCshC260moRBwypGsQqPYkb9cBDHP13OPOXryn-GnN3HUczbbeMw

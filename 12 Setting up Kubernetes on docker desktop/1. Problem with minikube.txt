@@ -1,0 +1,18 @@
+As we want to use ingress.
+
+As of now 8th March 2025 there is a problem with minikube using ingress
+minikube with docker driver does not work with ingress:
+> minikube start --driver=docker
+
+So we need to change our kubernetes setup.
+
+
+We will be using docker-desktop to setup kubernetes cluster.
+
+
+If you see the current namespaces its only minikube
+
+PS F:\Docker\11. Kubernetes Networking\kub-network-01-starting-setup> kubectl config get-contexts
+*         minikube   minikube   minikube   default
+
+
