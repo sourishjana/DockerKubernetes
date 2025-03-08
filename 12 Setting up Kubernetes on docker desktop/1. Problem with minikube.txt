@@ -1,6 +1,12 @@
 As we want to use ingress.
 
-As of now 8th March 2025 there is a problem with minikube using ingress
+goto: https://minikube.sigs.k8s.io/docs/drivers/docker/#known-issues
+
+As of now 8th March 2025 
+In the above website its written that:
+The ingress, and ingress-dns addons are currently only supported on Linux. See #7332
+
+there is a problem with minikube using ingress
 minikube with docker driver does not work with ingress:
 > minikube start --driver=docker
 
