@@ -2531,11 +2531,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "F:\\ASP.NET web api\\BookStore.API\\BookStore.API\\BookStore.API.csproj",
+      "projectUniqueName": "F:\\Docker\\7. Docker Demo App Dotnet Angular SqlServer\\BookStore.API\\BookStore.API\\BookStore.API.csproj",
       "projectName": "BookStore.API",
-      "projectPath": "F:\\ASP.NET web api\\BookStore.API\\BookStore.API\\BookStore.API.csproj",
+      "projectPath": "F:\\Docker\\7. Docker Demo App Dotnet Angular SqlServer\\BookStore.API\\BookStore.API\\BookStore.API.csproj",
       "packagesPath": "C:\\Users\\Sourish\\.nuget\\packages\\",
-      "outputPath": "F:\\ASP.NET web api\\BookStore.API\\BookStore.API\\obj\\",
+      "outputPath": "F:\\Docker\\7. Docker Demo App Dotnet Angular SqlServer\\BookStore.API\\BookStore.API\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

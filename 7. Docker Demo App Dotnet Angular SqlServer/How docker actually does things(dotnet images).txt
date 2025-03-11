@@ -1,0 +1,124 @@
+Dockerfile:
+
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+
+# This stage is used to build the service project
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src/BookStore.API
+COPY ["BookStore.API.csproj", "."]
+RUN dotnet restore "BookStore.API.csproj"
+COPY . .
+#WORKDIR "/src/BookStore.API"
+RUN dotnet build "BookStore.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
+# This stage is used to publish the service project to be copied to the final stage
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "BookStore.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish
+
+# This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "BookStore.API.dll"]
+
+
+
+
+
+we will be try to make the copy of same app:
+
+
+
+First we need to have dotnet 6 in the env / in case of docker we will pulling a image for dotnet 6 
+image: mcr.microsoft.com/dotnet/sdk:6.0
+
+
+
+goto this location F:\ASP.NET web api\BookStore.API\BookStore.API
+
+copy only csproj file to the newly created directoty F:\ASP.NET web api\CopyBookStore.API
+
+then run below command:
+
+
+
+> dotnet restore BookStore.API.csproj
+
+after this step a obj folder will be created as all the dependencies are installed and created
+
+Command Breakdown
+1. dotnet restore:
+Restores all NuGet packages required by the project.
+It downloads missing dependencies specified in the .csproj file.
+It uses the NuGet.config file (if available) to determine package sources.
+
+2. BookStore.API.csproj:
+Specifies the project file for which dependencies need to be restored.
+If omitted, it restores dependencies for the project in the current directory.
+
+After this copy all the other files other than [Dockerfile,bin,obj] into the new directory.
+
+
+
+> dotnet build BookStore.API.csproj -c Release -o "F:\ASP.NET web api\CopyBookStore.API\app\build"
+
+Command Breakdown:
+
+1. dotnet build
+Compiles the application and generates intermediate files (.dll, .exe, etc.).
+Does not include publishing-related optimizations.
+
+2. BookStore.API.csproj
+Specifies the .csproj file to build.
+
+3. -c Release
+Sets the configuration to Release (optimized for production).
+The default configuration is Debug.
+
+4. -o "F:\ASP.NET web api\CopyBookStore.API\app\build"
+Specifies the output directory where the compiled files will be placed.
+Without this, the default output path would be bin/Release/netX.Y/
+
+
+
+> dotnet publish BookStore.API.csproj -c Release -o /app/publish
+
+Command Breakdown:
+
+1. dotnet publish
+Builds and prepares the project for deployment.
+Includes all required DLLs and dependencies.
+
+2. BookStore.API.csproj
+Specifies the project file to publish.
+
+3. -c Release
+Sets the build configuration to Release.
+The Release build is optimized for production (smaller size, better performance).
+
+4. -o "F:\ASP.NET web api\CopyBookStore.API\app\publish"
+Specifies the output directory where the published files will be placed.
+
+
+Key Differences: dotnet build vs. dotnet publish
+
+Command	Purpose
+dotnet build		Compiles the project, but does not include all dependencies.
+dotnet publish		Compiles and packages the app with dependencies, ready for deployment.
+
+
+
+> cd app\publish\
+
+Go to the directory where files are there for publish
+
+
+
+To Run the app:
+
+> dotnet BookStore.API.dll

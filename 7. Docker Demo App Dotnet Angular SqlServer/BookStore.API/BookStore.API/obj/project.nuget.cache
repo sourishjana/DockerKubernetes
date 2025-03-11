@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "tnRfd5bH0w0=",
+  "dgSpecHash": "HaiceGLcO1E=",
   "success": true,
-  "projectFilePath": "F:\\ASP.NET web api\\BookStore.API\\BookStore.API\\BookStore.API.csproj",
+  "projectFilePath": "F:\\Docker\\7. Docker Demo App Dotnet Angular SqlServer\\BookStore.API\\BookStore.API\\BookStore.API.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Sourish\\.nuget\\packages\\automapper\\11.0.1\\automapper.11.0.1.nupkg.sha512",
     "C:\\Users\\Sourish\\.nuget\\packages\\automapper.extensions.microsoft.dependencyinjection\\11.0.0\\automapper.extensions.microsoft.dependencyinjection.11.0.0.nupkg.sha512",
