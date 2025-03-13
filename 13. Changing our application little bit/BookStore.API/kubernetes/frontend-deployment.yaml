@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: sourishjana/demoimages:f1
+          image: sourishjana/demoimages:f3
           env:
             - name: API_URL 
-              value: "http://api-service-bookapp.bookapp/api/books/"
+              value: "http://api-service-bookapp.bookapp:80/api/books/"

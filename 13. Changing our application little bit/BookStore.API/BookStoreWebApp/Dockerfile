@@ -11,7 +11,7 @@
 # CMD ["ng", "serve", "--host", "0.0.0.0"]
 
 # Stage 1: Build the Angular application
-FROM node:16
+FROM node:16 as builder
 WORKDIR /app
 
 # Copy package.json and install dependencies
@@ -23,6 +23,14 @@ RUN npm install
 # Copy the rest of the application
 COPY . .
 
-EXPOSE 8080
+RUN npm run build
 
-CMD [ "npm", "start" ]
+FROM nginx:1.19-alpine
+
+COPY --from=builder /app/dist/BookStoreWebApp /usr/share/nginx/html
+
+COPY conf/nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 8070
+
+CMD [ "nginx", "-g", "daemon off;" ]

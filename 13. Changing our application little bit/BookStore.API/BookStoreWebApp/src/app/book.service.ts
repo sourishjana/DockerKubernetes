@@ -10,6 +10,7 @@ export class BookService {
 
   //private baseUrl='https://localhost:7160/api/books/'
   private baseUrl= this.env?.API_URL || 'http://localhost:70/api/books/'
+  //private baseUrl= 'http://10.104.53.97:80/api/books/'
 
   constructor(private http:HttpClient) { }
 

@@ -1,6 +1,8 @@
 
 Create a deployment.yaml and service.yaml file
 
+for creating sql deployment goto: https://learn.microsoft.com/en-us/sql/linux/quickstart-sql-server-containers-azure?view=sql-server-ver16&tabs=kubectl
+
 
 > kubectl get pods -n bookapp
 NAME                                        READY   STATUS              RESTARTS   AGE

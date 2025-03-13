@@ -50,7 +50,7 @@ services:
   angularapp:
     build: ./BookStoreWebApp
     ports:
-      - "3001:8080"
+      - "3001:8070"
     env_file:
       - ./env/frontend.env
     stdin_open: true 
