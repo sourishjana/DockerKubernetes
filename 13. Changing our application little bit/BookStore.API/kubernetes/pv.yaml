@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mssql-pv-bookapp
+  namespace: bookapp
+spec:
+  capacity:
+    storage: 1Gi  # Set the storage size
+  accessModes:
+    - ReadWriteOnce  # Only one pod can use it at a time
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: hostpath
+  hostPath:
+    path: /mnt/data/mssql  # Local storage path on the node
+    type: DirectoryOrCreate

@@ -1,0 +1,32 @@
+
+Create a deployment.yaml and service.yaml file
+
+
+> kubectl get pods -n bookapp
+NAME                                        READY   STATUS              RESTARTS   AGE
+mssql-deployment-bookapp-75575cd78f-5v6hz   0/1     ContainerCreating   0          17s
+
+> kubectl get services -n bookapp
+NAME                    TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+mssql-service-bookapp   LoadBalancer   10.105.118.19   localhost     1433:30312/TCP   32s
+
+> kubectl port-forward svc/mssql-service-bookapp 1430:1433 -n bookapp
+Forwarding from 127.0.0.1:1430 -> 1433
+Forwarding from [::1]:1430 -> 1433
+Handling connection for 1430
+Handling connection for 1430
+Handling connection for 1430
+
+
+To get logs for the pod:
+> kubectl logs mssql-deployment-bookapp-75575cd78f-5v6hz -n bookapp
+
+
+To test sql server:
+> sqlcmd -S 127.0.0.1,1430 -U sa -P EDMCore541
+
+
+You can connect by SSMS using 127.0.0.1,1430 
+
+
+

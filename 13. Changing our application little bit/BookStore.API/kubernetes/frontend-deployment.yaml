@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment-bookapp
+  namespace: bookapp
+spec:
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: sourishjana/demoimages:f1
+          env:
+            - name: API_URL 
+              value: "http://api-service-bookapp.bookapp/api/books/"

@@ -1,0 +1,120 @@
+📌 Breakdown of sqldatabase (SQL Server container)
+
+  sqldatabase:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    env_file:
+      - ./env/sqlserver.env
+    ports:
+      - 8095:1433
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P EDMCore541 -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      retries: 10
+      start_period: 10s
+      timeout: 3s
+✅ Explanation:
+Uses the latest SQL Server 2022 image:
+
+
+image: mcr.microsoft.com/mssql/server:2022-latest
+Loads environment variables from a file (sqlserver.env):
+
+
+env_file:
+   - ./env/sqlserver.env
+This likely contains variables like SA_PASSWORD, ACCEPT_EULA, etc.
+Maps SQL Server to port 8095 on the host machine (localhost)
+
+
+ports:
+   - 8095:1433
+This means you can connect using:
+
+Server=tcp:localhost,8095;Database=BookStoreDB;User Id=sa;Password=EDMCore541;
+restart: always
+
+Ensures the container restarts automatically if it crashes.
+Defines a healthcheck to verify if SQL Server is ready
+
+
+healthcheck:
+   test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P EDMCore541 -Q 'SELECT 1' || exit 1"]
+   interval: 10s
+   retries: 10
+   start_period: 10s
+   timeout: 3s
+Runs the command:
+
+/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P EDMCore541 -Q 'SELECT 1'
+If the command fails, it exits with 1, marking the container as unhealthy.
+Runs every 10s, with up to 10 retries before failing.
+📌 Breakdown of sqldatabase.configurator (Database Initialization)
+
+  sqldatabase.configurator:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d
+    depends_on:
+      sqldatabase:
+        condition: service_healthy
+    command: >
+      bash -c '
+      /opt/mssql-tools18/bin/sqlcmd -S sqldatabase -U sa -P EDMCore541 -C -d master -i docker-entrypoint-initdb.d/init.sql;
+      echo "All done!";
+      '
+✅ Explanation:
+Creates a separate container to initialize the database schema
+
+
+image: mcr.microsoft.com/mssql/server:2022-latest
+Uses the same SQL Server image but only for running the script (not a running database).
+Mounts the init.sql script into the container
+
+
+volumes:
+   - ./init:/docker-entrypoint-initdb.d
+This means your local ./init/init.sql will be available inside the container at /docker-entrypoint-initdb.d/init.sql.
+Ensures this runs only after sqldatabase is healthy
+
+depends_on:
+   sqldatabase:
+     condition: service_healthy
+Prevents running the initialization script before SQL Server is ready.
+Runs the SQL script (init.sql) inside the database
+
+
+command: >
+   bash -c '
+   /opt/mssql-tools18/bin/sqlcmd -S sqldatabase -U sa -P EDMCore541 -C -d master -i docker-entrypoint-initdb.d/init.sql;
+   echo "All done!";
+   '
+Runs a bash script that:
+Uses sqlcmd to execute init.sql on the sqldatabase container.
+Prints "All done!" after execution.
+📌 How This Works Step-by-Step
+1️⃣ sqldatabase container starts
+
+It loads environment variables (sqlserver.env)
+Exposes port 8095 for external connections
+Runs a health check (SELECT 1) every 10 seconds
+If SQL Server is not ready, it keeps retrying (up to 10 times)
+2️⃣ Once sqldatabase is healthy...
+
+The sqldatabase.configurator waits for SQL Server to be ready.
+3️⃣ sqldatabase.configurator runs the SQL script (init.sql)
+
+It connects to SQL Server and executes the database schema creation.
+Once done, it exits automatically (this container is not meant to run permanently).
+📌 Why This Approach? (Best Practices)
+✅ Prevents database script from running before SQL Server is ready
+✅ Keeps SQL Server (sqldatabase) separate from configuration logic
+✅ Uses depends_on: service_healthy to avoid race conditions
+✅ Keeps the main database container running (restart: always)
+✅ Ensures database schema is set up every time docker-compose up is run
+
+
+
+
+
+https://learn.microsoft.com/en-us/answers/questions/1496389/how-to-create-a-mssql-database-within-mssql-server

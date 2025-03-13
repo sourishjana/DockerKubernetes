@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-map-bookapp
+  namespace: bookapp
+data:
+  sqlServerName: "sql-service.bookapp"
+  dbName: "BookStoreDB"
+  userId: "sa"
+  password: "EDMCore541"
+  #apiUrl: "http://localhost:70/api/books/"
+  acceptEula: "Y"
+  saPassword: "EDMCore541"
+  msSqlPid: "Developer"

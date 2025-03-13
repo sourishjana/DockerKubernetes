@@ -1,0 +1,40 @@
+
+>docker build -t bookfrontend:bookfrontend1 .
+>docker tag bookfrontend:bookfrontend1 sourishjana/demoimages:f1
+>docker push sourishjana/demoimages:f1
+
+Create yaml file (ingress.yaml, frontend-deployment.yaml, frontend-service.yaml)
+
+> kubectl apply -f kubernetes
+
+> kubectl get ingress -n bookapp
+NAME                      CLASS   HOSTS   ADDRESS   PORTS   AGE
+ingress-service-bookapp   nginx   *                 80      18m
+
+> kubectl get pods -n bookapp
+NAME                                           READY   STATUS    RESTARTS   AGE
+api-deployment-8664c4b546-vnlfk                1/1     Running   0          77m
+frontend-deployment-bookapp-85cfcdcd5f-mstx7   1/1     Running   0          3m22s
+mssql-deployment-bookapp-547f6b8bcd-t4fc5      1/1     Running   0          111m
+
+> kubectl get svc -n bookapp
+NAME                       TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+api-service                LoadBalancer   10.108.254.242   <pending>     80:32123/TCP     82m
+api-service-bookapp        ClusterIP      10.104.53.97     <none>        80/TCP           24m
+frontend-service-bookapp   ClusterIP      10.105.91.135    <none>        3000/TCP         24m
+mssql-service-bookapp      LoadBalancer   10.109.36.84     localhost     1433:31933/TCP   168m
+
+
+> kubectl port-forward -n ingress-nginx svc/ingress-nginx-controller 8888:80
+Forwarding from 127.0.0.1:8888 -> 80
+Forwarding from [::1]:8888 -> 80
+Handling connection for 8888
+Handling connection for 8888
+
+
+
+For Logs:
+
+> kubectl logs -l app.kubernetes.io/name=ingress-nginx -n ingress-nginx
+
+> kubectl logs api-deployment-8664c4b546-vnlfk -n bookapp

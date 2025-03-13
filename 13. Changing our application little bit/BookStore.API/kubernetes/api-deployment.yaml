@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-deployment
+  namespace: bookapp
+spec: 
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: sourishjana/demoimages:b1
+          env:
+            - name: SERVER_NAME 
+              value: "mssql-service-bookapp.bookapp"
+            - name: DATABASE_NAME 
+              value: "BookStoreDB" 
+            - name: USER_ID 
+              value: "sa"
+            - name: PASSWORD 
+              value: "EDMCore541"

@@ -1,0 +1,19 @@
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Id</th>
+      <th scope="col">Title</th>
+      <th scope="col">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let book of books">
+      <th scope="row">{{ book.id }}</th>
+      <td>{{ (book.title.length>10)? (book.title | slice:0:10)+'...' : (book.title) }}</td>
+      <td>{{ (book.description.length>20)? (book.description | slice:0:25)+'...' : (book.description) }}</td>
+      <td>
+        <button class="btn btn-success" [routerLink]="['/book', book.id]">Edit</button>
+      </td>
+    </tr>
+  </tbody>
+</table>

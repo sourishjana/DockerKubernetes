@@ -1,0 +1,35 @@
+
+> docker build -t bookapi:bookapi1 .
+
+> docker tag bookapi:bookapi1 sourishjana/demoimages:b1
+
+> docker push sourishjana/demoimages:b1
+
+Create yaml files: ( api-service.yaml, api-deployment.yaml)
+
+> kubectl delete namespace bookapp
+
+> kubectl create namespace bookapp
+
+> kubectl apply -f kuberenetes
+
+
+> kubectl get pods -n bookapp
+NAME                                        READY   STATUS    RESTARTS   AGE
+api-deployment-8664c4b546-vnlfk             1/1     Running   0          16s
+mssql-deployment-bookapp-547f6b8bcd-t4fc5   1/1     Running   0          34m
+
+> kubectl get svc -n bookapp
+NAME                    TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+api-service             LoadBalancer   10.108.254.242   <pending>     80:32123/TCP     34s
+mssql-service-bookapp   LoadBalancer   10.109.36.84     localhost     1433:31933/TCP   85m
+
+
+> kubectl port-forward svc/api-service 8086:80 -n bookapp
+Forwarding from 127.0.0.1:8086 -> 80
+Forwarding from [::1]:8086 -> 80
+Handling connection for 8086
+Handling connection for 8086
+
+
+

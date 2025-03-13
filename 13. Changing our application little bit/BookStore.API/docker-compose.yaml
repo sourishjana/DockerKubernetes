@@ -1,0 +1,63 @@
+name: bookapi
+services:
+  # sqldatabase:
+  #   image: mcr.microsoft.com/mssql/server:2022-latest
+  #   ports:
+  #     - "8095:1433"
+  #   volumes:
+  #     - sqldatabase_data:/var/opt/mssql
+  #     - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Mount init.sql
+  #   env_file:
+  #     - ./env/sqlserver.env
+
+  sqldatabase:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    env_file:
+      - ./env/sqlserver.env
+    ports:
+      - 8095:1433
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P EDMCore541 -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      retries: 10
+      start_period: 10s
+      timeout: 3s
+  sqldatabase.configurator:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d
+    depends_on:
+      sqldatabase:
+        condition: service_healthy
+    command: >
+      bash -c '
+      /opt/mssql-tools18/bin/sqlcmd -S sqldatabase -U sa -P EDMCore541 -C -d master -i docker-entrypoint-initdb.d/init.sql;
+      echo "All done!";
+      '
+
+
+  dotnetapp:
+    build: ./BookStore.API
+    ports:
+      - "70:80"
+      - "441:443"
+    env_file:
+      - ./env/bookapp.env
+    depends_on:
+      - sqldatabase
+
+  angularapp:
+    build: ./BookStoreWebApp
+    ports:
+      - "3001:8080"
+    env_file:
+      - ./env/frontend.env
+    stdin_open: true 
+    tty: true 
+    depends_on:
+      - dotnetapp
+
+
+volumes:
+  sqldatabase_data:
