@@ -38,3 +38,126 @@ For Logs:
 > kubectl logs -l app.kubernetes.io/name=ingress-nginx -n ingress-nginx
 
 > kubectl logs api-deployment-8664c4b546-vnlfk -n bookapp
+
+
+
+Now this will not work as first we need to know how applications like react and angular works
+
+when we do ng serve to serve the application it makes the application up but we cannot pass envifonment variables into it 
+and we have to the manually get the API to which cient gives a call. we have to get the IP of the service which angular sends request to and hardcode it.
+
+Nginx is commonly used when deploying an Angular application in Kubernetes containers because of the following reasons:
+
+1. Serving Static Files Efficiently
+Angular applications are single-page applications (SPAs) that are compiled into static assets (HTML, CSS, JS).
+Nginx is highly optimized for serving static files efficiently, making it a better choice than using a Node.js or .NET Core server.
+
+2. Reverse Proxy and Load Balancing
+Nginx can act as a reverse proxy, forwarding API requests to backend services (e.g., .NET Core, Node.js, or Java services).
+It can also handle load balancing between multiple backend services.
+
+3. Handling Client-Side Routing (SPA Support)
+Angular applications use client-side routing (e.g., /dashboard, /profile).
+When users directly access a route, Nginx needs to serve the index.html file to let Angular handle routing.
+This is done using the Nginx configuration:
+
+location / {
+    try_files $uri /index.html;
+}
+
+4. Improved Performance & Caching
+Nginx can cache static files in memory to improve performance.
+It supports gzip and Brotli compression to reduce bandwidth usage.
+
+5. Security Enhancements
+Nginx provides security features like HTTPS termination, rate limiting, and request filtering.
+It can prevent direct access to backend services, exposing only necessary endpoints.
+
+6. Lightweight & Scalable
+Nginx is lightweight and consumes fewer resources than using a full-fledged backend server.
+It can be easily scaled in a Kubernetes environment using ConfigMaps for dynamic configuration updates.
+
+7. Integration with Kubernetes
+In Kubernetes, you can use an Nginx Ingress Controller to manage routing to different microservices.
+It helps in setting up rules for handling domain-based or path-based routing.
+What Happens If We Don’t Use Nginx?
+If you don’t use Nginx (or another web server like Apache), you would need:
+
+A backend server (Node.js, .NET Core, etc.) to serve static Angular files, which is inefficient.
+A way to handle client-side routing manually.
+A different solution for reverse proxying and security.
+
+
+
+
+
+What is Rate Limiting?
+Rate limiting is a technique used to control the number of requests a client (IP, user, or API key) can send to a server within a specified time. It helps prevent:
+
+DDoS attacks – Blocking excessive requests from a single source.
+API abuse – Preventing excessive API calls from a single user.
+Server overload – Ensuring fair resource distribution among users.
+
+
+
+
+
+
+
+we will be creating a production build for angular and then serve the production build using nginx, because we have no other option to serve our production build.
+
+
+
+How a Angular Application works in Production:-------------------------------------------------------------------------------
+
+we have to run npm install to create all the node_modules
+> npm install
+
+Then we have to craete the production build using:
+> ng build --configuration=production
+
+it will create all the static files and assets inside /dist/BookStoreWebApp/
+
+Here we will not do [ng serve] to serve our application.
+Here we will be using nginx to serve our production build of our application.
+
+
+
+NGINX:------------------------------------------------------------------------------------------------------------------------
+
+for that we have to create a /conf/nginx.conf file.
+
+server {
+  listen 8070;
+
+  location /api/ {
+    proxy_pass http://dotnetapp/api/books/;
+  }
+  
+  location / {
+    root /usr/share/nginx/html;
+    index index.html index.htm;
+    try_files $uri $uri/ /index.html =404;
+  }
+  
+  include /etc/nginx/extra-conf.d/*.conf;
+}
+
+
+
+And then copy all the production build from /dist/BookStoreWebApp/ to /usr/share/nginx/html which will serve all the static files of angular production build.
+As if you see inside the /dist/BookStoreWebApp/ file you will see a index.html file which nginx uses to serve our application.
+
+just open the Dockerfile and nginx.conf file for better understanding.
+
+This is the reason why all SPA(Single Page applications) like React and Angualr will work the same way with nginx.
+
+
+
+
+
+
+
+
+
+

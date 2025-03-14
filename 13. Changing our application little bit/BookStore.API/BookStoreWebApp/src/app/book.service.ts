@@ -8,9 +8,8 @@ import { Book } from './models/book.model';
 export class BookService {
   private env = (window as any).__env;
 
-  //private baseUrl='https://localhost:7160/api/books/'
-  private baseUrl= this.env?.API_URL || 'http://localhost:70/api/books/'
-  //private baseUrl= 'http://10.104.53.97:80/api/books/'
+  //private baseUrl = 'http://localhost:70/api/books/' // In case if we donot use nginx 
+  private baseUrl= '/api/books/' // when we use nginx
 
   constructor(private http:HttpClient) { }
 

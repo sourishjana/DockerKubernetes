@@ -10,4 +10,4 @@ spec:
   ports:
     - protocol: TCP
       port: 3000
-      targetPort: 8080
+      targetPort: 8070 # Port on which nginx is listning
