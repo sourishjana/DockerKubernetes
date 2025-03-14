@@ -131,7 +131,7 @@ server {
   listen 8070;
 
   location /api/ {
-    proxy_pass http://dotnetapp/api/books/;
+    proxy_pass http://api-service-bookapp.bookapp:80/api/books/;
   }
   
   location / {
@@ -142,6 +142,12 @@ server {
   
   include /etc/nginx/extra-conf.d/*.conf;
 }
+
+And in the book.service.ts file the API url we are using to access dotnet app is 'http://localhost:70/api/books/'
+but when we use nginx we will use just '/api/books/' and it will redirect those api calls to 
+  location /api/ {
+    proxy_pass http://api-service-bookapp.bookapp:80/api/books/;
+  }
 
 
 
